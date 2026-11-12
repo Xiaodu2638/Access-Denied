@@ -15,8 +15,11 @@
 .arg-prologue-wallpaper {
   position: absolute;
   inset: 0;
-  // 开发者桌面用深色壁纸，和后面的 ARG 冷色桌面形成"同一台机器"的连贯感。
-  background: url("img/wallpaper/dark/img0.jpg") center / cover no-repeat;
+  // 壁纸路径由 JSX 内联注入。见 Prologue.jsx 的说明：
+  // CSS 里的相对 url 会被解析到 /assets/ 下，GitHub Pages 子路径部署时 404。
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
 }
 
 // 深色壁纸下图标文字需要反白。

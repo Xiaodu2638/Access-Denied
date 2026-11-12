@@ -730,7 +730,12 @@ const Prologue = () => {
       }}
       tabIndex={-1}
     >
-      <div className="arg-prologue-wallpaper"></div>
+      {/* 壁纸用内联样式注入：相对路径在 JSX 里按文档 URL 解析，
+          而写在 CSS 里会按打包后的 /assets/ 目录解析，部署到子路径就 404。 */}
+      <div
+        className="arg-prologue-wallpaper"
+        style={{ backgroundImage: "url(img/wallpaper/dark/img0.jpg)" }}
+      ></div>
 
       <div
         className="arg-prologue-desktop"
