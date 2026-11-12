@@ -19,7 +19,10 @@ export const PrologueWindow = ({
   useEscape(true, onClose);
 
   return (
-    <div className={"arg-app-window " + className} data-maximized={maximized ? "true" : "false"}>
+    <div
+      className={"arg-app-window " + className}
+      data-maximized={maximized ? "true" : "false"}
+    >
       <div className="arg-app-titlebar">
         <img className="arg-app-icon" src={`img/icon/${icon}.png`} alt="" />
         <span className="arg-app-title">{title}</span>
@@ -66,7 +69,11 @@ export const PrologueWindow = ({
             onClick={onClose}
           >
             <svg viewBox="0 0 10 10" width="10" height="10" aria-hidden="true">
-              <path d="M1.5 1.5l7 7M8.5 1.5l-7 7" stroke="currentColor" strokeWidth="1.1" />
+              <path
+                d="M1.5 1.5l7 7M8.5 1.5l-7 7"
+                stroke="currentColor"
+                strokeWidth="1.1"
+              />
             </svg>
           </button>
         </div>
@@ -246,7 +253,12 @@ const bookmarks = [
   { label: "MDN", page: "mdn" },
 ];
 
-export const BrowserWindow = ({ onClose, onMinimize, onMaximize, maximized }) => {
+export const BrowserWindow = ({
+  onClose,
+  onMinimize,
+  onMaximize,
+  maximized,
+}) => {
   const [page, setPage] = useState("home");
   const [typing, setTyping] = useState("");
 
@@ -277,8 +289,12 @@ export const BrowserWindow = ({ onClose, onMinimize, onMaximize, maximized }) =>
       </div>
 
       <div className="arg-browser-bar">
-        <span className="arg-browser-nav" data-disabled="true">←</span>
-        <span className="arg-browser-nav" data-disabled="true">→</span>
+        <span className="arg-browser-nav" data-disabled="true">
+          ←
+        </span>
+        <span className="arg-browser-nav" data-disabled="true">
+          →
+        </span>
         <button
           type="button"
           className="arg-browser-nav"
@@ -296,8 +312,10 @@ export const BrowserWindow = ({ onClose, onMinimize, onMaximize, maximized }) =>
             const value = typing.trim().toLowerCase();
             if (!value) return;
             if (value.includes("render-lab")) return go("github");
-            if (value.includes("localhost") || value.includes("5173")) return go("local");
-            if (value.includes("mdn") || value.includes("mozilla")) return go("mdn");
+            if (value.includes("localhost") || value.includes("5173"))
+              return go("local");
+            if (value.includes("mdn") || value.includes("mozilla"))
+              return go("mdn");
             go("home");
           }}
           spellCheck="false"
@@ -324,7 +342,9 @@ export const BrowserWindow = ({ onClose, onMinimize, onMaximize, maximized }) =>
           <div className="arg-browser-error">
             <div className="arg-browser-error-code">{current.error.code}</div>
             <div className="arg-browser-error-text">{current.error.text}</div>
-            <div className="arg-browser-error-detail">{current.error.detail}</div>
+            <div className="arg-browser-error-detail">
+              {current.error.detail}
+            </div>
             <button
               type="button"
               className="arg-browser-back"
@@ -374,7 +394,12 @@ export const BrowserWindow = ({ onClose, onMinimize, onMaximize, maximized }) =>
   );
 };
 
-export const NotepadWindow = ({ onClose, onMinimize, onMaximize, maximized }) => (
+export const NotepadWindow = ({
+  onClose,
+  onMinimize,
+  onMaximize,
+  maximized,
+}) => (
   <PrologueWindow
     title="未命名 - 记事本"
     subtitle="记事本"
@@ -397,7 +422,12 @@ export const NotepadWindow = ({ onClose, onMinimize, onMaximize, maximized }) =>
   </PrologueWindow>
 );
 
-export const CalculatorWindow = ({ onClose, onMinimize, onMaximize, maximized }) => {
+export const CalculatorWindow = ({
+  onClose,
+  onMinimize,
+  onMaximize,
+  maximized,
+}) => {
   const [display, setDisplay] = useState("0");
   const [acc, setAcc] = useState(null);
   const [op, setOp] = useState(null);
@@ -474,13 +504,23 @@ export const CalculatorWindow = ({ onClose, onMinimize, onMaximize, maximized })
         <button type="button" onClick={clear}>
           C
         </button>
-        <button type="button" onClick={() => setDisplay(String(-Number(display)))}>
+        <button
+          type="button"
+          onClick={() => setDisplay(String(-Number(display)))}
+        >
           ±
         </button>
-        <button type="button" onClick={() => setDisplay(String(Number(display) / 100))}>
+        <button
+          type="button"
+          onClick={() => setDisplay(String(Number(display) / 100))}
+        >
           %
         </button>
-        <button type="button" className="arg-calc-op" onClick={() => chooseOp("÷")}>
+        <button
+          type="button"
+          className="arg-calc-op"
+          onClick={() => chooseOp("÷")}
+        >
           ÷
         </button>
 
@@ -489,7 +529,11 @@ export const CalculatorWindow = ({ onClose, onMinimize, onMaximize, maximized })
             {digit}
           </button>
         ))}
-        <button type="button" className="arg-calc-op" onClick={() => chooseOp("×")}>
+        <button
+          type="button"
+          className="arg-calc-op"
+          onClick={() => chooseOp("×")}
+        >
           ×
         </button>
 
@@ -498,7 +542,11 @@ export const CalculatorWindow = ({ onClose, onMinimize, onMaximize, maximized })
             {digit}
           </button>
         ))}
-        <button type="button" className="arg-calc-op" onClick={() => chooseOp("-")}>
+        <button
+          type="button"
+          className="arg-calc-op"
+          onClick={() => chooseOp("-")}
+        >
           −
         </button>
 
@@ -507,7 +555,11 @@ export const CalculatorWindow = ({ onClose, onMinimize, onMaximize, maximized })
             {digit}
           </button>
         ))}
-        <button type="button" className="arg-calc-op" onClick={() => chooseOp("+")}>
+        <button
+          type="button"
+          className="arg-calc-op"
+          onClick={() => chooseOp("+")}
+        >
           +
         </button>
 
@@ -525,7 +577,12 @@ export const CalculatorWindow = ({ onClose, onMinimize, onMaximize, maximized })
   );
 };
 
-export const SettingsWindow = ({ onClose, onMinimize, onMaximize, maximized }) => (
+export const SettingsWindow = ({
+  onClose,
+  onMinimize,
+  onMaximize,
+  maximized,
+}) => (
   <PrologueWindow
     title="设置"
     subtitle="系统"
@@ -599,7 +656,13 @@ export const BinWindow = ({ onClose, onMinimize, onMaximize, maximized }) => (
 // 不讲故事、不显示头像、不解释线索，只给系统会说的话。
 const RDP_ADDRESS = "10.24.7.31";
 
-export const RdpWindow = ({ onClose, onMinimize, onMaximize, maximized, onConnect }) => {
+export const RdpWindow = ({
+  onClose,
+  onMinimize,
+  onMaximize,
+  maximized,
+  onConnect,
+}) => {
   const dispatch = useDispatch();
   const [address, setAddress] = useState("");
   const [password, setPassword] = useState("");
@@ -655,7 +718,12 @@ export const RdpWindow = ({ onClose, onMinimize, onMaximize, maximized, onConnec
         <div className="arg-sec-dialog">
           <div className="arg-sec-head">
             <div className="arg-sec-shield">
-              <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+              <svg
+                viewBox="0 0 16 16"
+                width="16"
+                height="16"
+                aria-hidden="true"
+              >
                 <path
                   d="M8 1.5 2.5 3.8v4.1c0 3.2 2.3 5.7 5.5 6.6 3.2-.9 5.5-3.4 5.5-6.6V3.8z"
                   fill="none"
@@ -819,7 +887,12 @@ const vscodeSource = [
   "// TODO: 帧率还是不稳，先记着。",
 ];
 
-export const VSCodeWindow = ({ onClose, onMinimize, onMaximize, maximized }) => {
+export const VSCodeWindow = ({
+  onClose,
+  onMinimize,
+  onMaximize,
+  maximized,
+}) => {
   const [file, setFile] = useState("renderer.js");
 
   return (
@@ -864,9 +937,7 @@ export const VSCodeWindow = ({ onClose, onMinimize, onMaximize, maximized }) => 
             </div>
           </div>
 
-          <div className="arg-code-breadcrumb">
-            render-lab › src › {file}
-          </div>
+          <div className="arg-code-breadcrumb">render-lab › src › {file}</div>
 
           <div className="arg-code-body win11Scroll">
             {vscodeSource.map((line, index) => (
@@ -944,11 +1015,7 @@ export const PrologueTerminalWindow = ({
   >
     <div className="arg-proterm-body win11Scroll">
       {prologueTerm.map((line, index) => (
-        <pre
-          key={index}
-          className="arg-proterm-line"
-          data-tone={line.tone}
-        >
+        <pre key={index} className="arg-proterm-line" data-tone={line.tone}>
           {line.text || "\u00a0"}
         </pre>
       ))}
@@ -988,7 +1055,9 @@ export const PrologueGithubWindow = ({
 
     <div className="arg-gh-tabs">
       <span data-active="true">Code</span>
-      <span>Issues <b>0</b></span>
+      <span>
+        Issues <b>0</b>
+      </span>
       <span>Pull requests</span>
       <span>Actions</span>
       <span>Settings</span>
@@ -1011,7 +1080,9 @@ export const PrologueGithubWindow = ({
               {item.type === "folder" ? "📁" : "📄"} {item.name}
             </span>
             <span className="arg-gh-msg">
-              {item.type === "folder" ? "调整模糊半径" : "wip(render): 调整模糊半径"}
+              {item.type === "folder"
+                ? "调整模糊半径"
+                : "wip(render): 调整模糊半径"}
             </span>
             <span className="arg-gh-time">昨天</span>
           </div>
@@ -1022,9 +1093,7 @@ export const PrologueGithubWindow = ({
         <p>一个用来试 WebGPU 和渲染管线的小仓库。</p>
         <p>目前只有模糊和后处理两个 pass，帧率还没调稳。</p>
         <pre>npm run dev</pre>
-        <p className="arg-gh-warn">
-          TODO: 把帧率测出来再写结论。
-        </p>
+        <p className="arg-gh-warn">TODO: 把帧率测出来再写结论。</p>
       </div>
     </div>
   </PrologueWindow>

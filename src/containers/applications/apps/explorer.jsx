@@ -108,7 +108,10 @@ const Explorer = () => {
   useEffect(() => {
     if (!selected || selected.name !== ".session") return;
     if (flags.readSession === true) return;
-    dispatch({ type: "ARG_FLAG", payload: { flag: "readSession", value: true } });
+    dispatch({
+      type: "ARG_FLAG",
+      payload: { flag: "readSession", value: true },
+    });
   }, [selected, flags.readSession, dispatch]);
 
   const items = useMemo(() => {
@@ -155,20 +158,15 @@ const Explorer = () => {
   const locked = selected && !canAccess(selected, flags);
 
   // Esc 返回上一级；已经在项目根目录时不做任何事。
-  useEscape(
-    !wnapp.hide,
-    () => {
-      if (current && current.parent) {
-        setCwd(current.parent);
-        setSelectedId(null);
-      }
-    },
-  );
+  useEscape(!wnapp.hide, () => {
+    if (current && current.parent) {
+      setCwd(current.parent);
+      setSelectedId(null);
+    }
+  });
 
   const previewContent =
-    selected && selected.type === "file"
-      ? contentOf(selected, flags)
-      : null;
+    selected && selected.type === "file" ? contentOf(selected, flags) : null;
 
   return (
     <div
@@ -222,9 +220,7 @@ const Explorer = () => {
           <div className="arg-exp-path" title={displayPath(cwd)}>
             {chain.map((node, index) => (
               <React.Fragment key={node.id}>
-                {index > 0 ? (
-                  <span className="arg-exp-sep">›</span>
-                ) : null}
+                {index > 0 ? <span className="arg-exp-sep">›</span> : null}
                 <button
                   type="button"
                   className="arg-exp-crumb"
@@ -279,7 +275,9 @@ const Explorer = () => {
             <button
               type="button"
               className="arg-exp-side-item"
-              data-active={current && current.name === "Desktop" ? "true" : "false"}
+              data-active={
+                current && current.name === "Desktop" ? "true" : "false"
+              }
               onClick={() => {
                 setCwd(`${fileSystem.rootId}/Desktop`);
                 setSelectedId(null);
@@ -334,7 +332,9 @@ const Explorer = () => {
                   type="button"
                   className="arg-exp-item"
                   data-active={selectedId === node.id ? "true" : "false"}
-                  data-locked={node.locked && !canAccess(node, flags) ? "true" : "false"}
+                  data-locked={
+                    node.locked && !canAccess(node, flags) ? "true" : "false"
+                  }
                   onClick={() => select(node)}
                   onDoubleClick={() =>
                     node.type === "folder" ? enter(node) : launch(node)

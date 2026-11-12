@@ -9,9 +9,7 @@ export const browserMeta = {
   home: "github",
   notFound: {
     title: "无法访问此页面",
-    blocks: [
-      { type: "p", text: "这个地址不在当前会话的白名单里。" },
-    ],
+    blocks: [{ type: "p", text: "这个地址不在当前会话的白名单里。" }],
   },
 };
 

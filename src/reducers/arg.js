@@ -1,5 +1,9 @@
 import { createDefaultProgress } from "../data/arg";
-import { clearArgProgress, loadArgProgress, saveArgProgress } from "../utils/arg";
+import {
+  clearArgProgress,
+  loadArgProgress,
+  saveArgProgress,
+} from "../utils/arg";
 
 const MAX_HISTORY = 200;
 
@@ -89,7 +93,10 @@ const argReducer = (state = defState, action) => {
     case "ARG_LOCK_OVERRIDE": {
       tmp = {
         ...state,
-        lockOverride: { ...(state.lockOverride || {}), ...(action.payload || {}) },
+        lockOverride: {
+          ...(state.lockOverride || {}),
+          ...(action.payload || {}),
+        },
       };
       break;
     }

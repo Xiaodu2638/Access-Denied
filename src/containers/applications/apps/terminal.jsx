@@ -20,7 +20,8 @@ import "./assets/arg-terminal.scss";
 // 这里只做输入、历史、滚动和进度标记。
 // 玩家在这里敲过的命令会写进 state.arg.terminalHistory，供结局判断。
 
-const toneClass = (tone) => (tone ? `arg-term-line arg-term-${tone}` : "arg-term-line");
+const toneClass = (tone) =>
+  tone ? `arg-term-line arg-term-${tone}` : "arg-term-line";
 
 const welcomeEntries = () =>
   terminalMeta.welcome.map((line, index) => ({
@@ -101,9 +102,15 @@ export const WnTerminal = () => {
     dispatch({ type: "ARG_TERM_PUSH", payload: cmd });
 
     // 带子命令的完整命令优先匹配，例如 git log / maintainer --accept。
-    const fullKey = [lower, ...rest.map((part) => part.toLowerCase())].join(" ");
+    const fullKey = [lower, ...rest.map((part) => part.toLowerCase())].join(
+      " ",
+    );
     const subKey = `${lower} ${rest[0] ? rest[0].toLowerCase() : ""}`.trim();
-    const def = commands[fullKey] || commands[cmd.toLowerCase()] || commands[subKey] || commands[lower];
+    const def =
+      commands[fullKey] ||
+      commands[cmd.toLowerCase()] ||
+      commands[subKey] ||
+      commands[lower];
 
     if (!def) {
       push(unknownCommand(head));
@@ -147,7 +154,10 @@ export const WnTerminal = () => {
 
       if (arg.trim() === unlockKey) {
         push(def.lines);
-        dispatch({ type: "ARG_FLAG", payload: { flag: "unlocked", value: true } });
+        dispatch({
+          type: "ARG_FLAG",
+          payload: { flag: "unlocked", value: true },
+        });
       } else {
         push(def.wrongLines || []);
       }
@@ -156,7 +166,10 @@ export const WnTerminal = () => {
 
     if (lower === "restore") {
       push(def.lines);
-      dispatch({ type: "ARG_FLAG", payload: { flag: "restored", value: true } });
+      dispatch({
+        type: "ARG_FLAG",
+        payload: { flag: "restored", value: true },
+      });
       return;
     }
 
@@ -173,7 +186,10 @@ export const WnTerminal = () => {
       }
 
       const parent = node.parent ? fileSystem.nodes[node.parent] : null;
-      if ((node.locked && !canAccess(node, flags)) || (parent && !canAccess(parent, flags))) {
+      if (
+        (node.locked && !canAccess(node, flags)) ||
+        (parent && !canAccess(parent, flags))
+      ) {
         push([{ text: "拒绝访问。", tone: "err" }]);
         return;
       }

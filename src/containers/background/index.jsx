@@ -122,8 +122,7 @@ export const LockScreen = (props) => {
     (state) => state.arg && state.arg.flags && state.arg.flags.postEnding,
   );
   const lastLogin = (lockOverride && lockOverride.lastLogin) || lock.lastLogin;
-  const sessionText =
-    (lockOverride && lockOverride.session) || lock.session;
+  const sessionText = (lockOverride && lockOverride.session) || lock.session;
 
   const { puzzle } = lock;
 
@@ -227,9 +226,7 @@ export const LockScreen = (props) => {
           <span className="arg-lock-status-sep">·</span>
           <span>
             当前用户{" "}
-            <b>
-              {(lockOverride && lockOverride.identity) || lock.currentUser}
-            </b>
+            <b>{(lockOverride && lockOverride.identity) || lock.currentUser}</b>
           </span>
         </div>
 
@@ -258,7 +255,12 @@ export const LockScreen = (props) => {
                 aria-label={puzzle.submit}
                 disabled={busy || !answer.trim()}
               >
-                <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+                <svg
+                  viewBox="0 0 16 16"
+                  width="14"
+                  height="14"
+                  aria-hidden="true"
+                >
                   <path
                     d="M2 8h10M8 4l4 4-4 4"
                     fill="none"
@@ -279,7 +281,10 @@ export const LockScreen = (props) => {
           </div>
         ) : null}
 
-        {puzzle.hint && attempts >= puzzle.hintAfter && !unlocked && !rdpAuthed ? (
+        {puzzle.hint &&
+        attempts >= puzzle.hintAfter &&
+        !unlocked &&
+        !rdpAuthed ? (
           <div className="arg-lock-hint">{puzzle.hint}</div>
         ) : null}
 
@@ -319,9 +324,7 @@ export const LockScreen = (props) => {
               {(lockOverride && lockOverride.note) || puzzle.notice.title}
             </span>
             <span>
-              {(lockOverride && lockOverride.note)
-                ? ""
-                : puzzle.notice.body}
+              {lockOverride && lockOverride.note ? "" : puzzle.notice.body}
             </span>
           </div>
         ) : null}
@@ -334,8 +337,16 @@ export const LockScreen = (props) => {
         </div>
 
         <div className="arg-lock-bottom-right">
-          <img className="arg-lock-tray" src="img/icon/ui/network.png" alt="网络" />
-          <img className="arg-lock-tray" src="img/icon/ui/audio3.png" alt="音量" />
+          <img
+            className="arg-lock-tray"
+            src="img/icon/ui/network.png"
+            alt="网络"
+          />
+          <img
+            className="arg-lock-tray"
+            src="img/icon/ui/audio3.png"
+            alt="音量"
+          />
           <img
             className="arg-lock-tray arg-lock-power"
             src="img/icon/ui/power.png"

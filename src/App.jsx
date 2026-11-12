@@ -161,7 +161,10 @@ function App() {
           <ActMenu />
         </div>
         {!arg.flags.prologueSeen ? <Prologue /> : null}
-        {arg.flags.prologueSeen && wall.booted && !wall.locked && !arg.ending ? (
+        {arg.flags.prologueSeen &&
+        wall.booted &&
+        !wall.locked &&
+        !arg.ending ? (
           <ArgNotification />
         ) : null}
         {arg.ending ? <Ending /> : null}

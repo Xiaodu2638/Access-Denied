@@ -16,8 +16,7 @@ import "./assets/arg-browser.scss";
 // 伪浏览器：只访问 src/data/arg/browser.js 里定义的内部页面。
 // 没有 iframe，也不发任何外部请求；地址栏只接受预设地址和别名。
 
-const openPage = (id) =>
-  pages[id] || pages[browserMeta.home] || pages.github;
+const openPage = (id) => pages[id] || pages[browserMeta.home] || pages.github;
 
 // 动态页面：目录列表和 dump 的内容随进度变化。
 const blocksOf = (page, flags) => {
@@ -91,7 +90,9 @@ const PageBody = ({ page, flags, onNavigate, onEnding }) => {
 
         {ready ? (
           <div className="arg-web-ending">
-            <div className="arg-web-ending-label">现在你可以决定怎么处理它。</div>
+            <div className="arg-web-ending-label">
+              现在你可以决定怎么处理它。
+            </div>
             <div className="arg-web-ending-actions">
               <button
                 type="button"

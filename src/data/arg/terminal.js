@@ -88,7 +88,10 @@ export const commands = {
     usage: "ls",
     description: "列出当前目录",
     lines: [
-      { text: "README.md    session.js    commits.log    logs/    src/    encrypted/", tone: "dim" },
+      {
+        text: "README.md    session.js    commits.log    logs/    src/    encrypted/",
+        tone: "dim",
+      },
     ],
   },
   "git log": {

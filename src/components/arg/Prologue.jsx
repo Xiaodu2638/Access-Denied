@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useDispatch } from "react-redux";
 import { prologue } from "../../data/arg/prologue";
 import { lock } from "../../data/arg/config";
@@ -170,7 +176,11 @@ const FloatingWindow = ({
   return (
     <>
       {preview ? (
-        <div className="arg-snap-preview" data-zone={preview} aria-hidden="true" />
+        <div
+          className="arg-snap-preview"
+          data-zone={preview}
+          aria-hidden="true"
+        />
       ) : null}
 
       <div
@@ -329,7 +339,9 @@ const Prologue = () => {
     setMenu(null);
     setIconMenu(null);
     setSelectedIcon(null);
-    setRecentApps((prev) => [id, ...prev.filter((entry) => entry !== id)].slice(0, 4));
+    setRecentApps((prev) =>
+      [id, ...prev.filter((entry) => entry !== id)].slice(0, 4),
+    );
     setOpenWindows((prev) => {
       const hit = prev.find((item) => item.id === id);
       zRef.current += 1;
@@ -340,7 +352,10 @@ const Prologue = () => {
             : item,
         );
       }
-      return [...prev, { id, z: zRef.current, minimized: false, maximized: false }];
+      return [
+        ...prev,
+        { id, z: zRef.current, minimized: false, maximized: false },
+      ];
     });
   }, []);
 
@@ -412,7 +427,8 @@ const Prologue = () => {
     const appOf = (id) => prologue.desktopIcons.find((icon) => icon.id === id);
 
     const isHotkey = (event) =>
-      (event.ctrlKey || event.altKey) && (event.key === "`" || event.code === "Backquote");
+      (event.ctrlKey || event.altKey) &&
+      (event.key === "`" || event.code === "Backquote");
 
     const onKeyDown = (event) => {
       // 切换面板打开时，用方向键 / Tab 轮换，Enter 或 Esc 结束。
@@ -427,7 +443,9 @@ const Prologue = () => {
           const step = event.key === "ArrowRight" ? 1 : -1;
           switchIndex.current =
             (switchIndex.current + step + listable.length) % listable.length;
-          setSwitcher((prev) => (prev ? { ...prev, index: switchIndex.current } : prev));
+          setSwitcher((prev) =>
+            prev ? { ...prev, index: switchIndex.current } : prev,
+          );
           return;
         }
         if (event.key === "Enter") {
@@ -506,142 +524,160 @@ const Prologue = () => {
       ]);
 
     return (
-    <div className="arg-mail-window">
-      <div className="arg-mail-titlebar">
-        <span className="arg-mail-appname">{prologue.mailbox.title}</span>
-        <span className="arg-mail-title">
-          {prologue.mailbox.activeFolder} · {prologue.host.account}
-        </span>
+      <div className="arg-mail-window">
+        <div className="arg-mail-titlebar">
+          <span className="arg-mail-appname">{prologue.mailbox.title}</span>
+          <span className="arg-mail-title">
+            {prologue.mailbox.activeFolder} · {prologue.host.account}
+          </span>
 
-        <div className="arg-app-controls">
-          <button
-            type="button"
-            className="arg-app-ctl"
-            aria-label="最小化"
-            title="最小化"
-            onClick={handlers.onMinimize}
-          >
-            <svg viewBox="0 0 10 10" width="10" height="10" aria-hidden="true">
-              <path d="M1 5h8" stroke="currentColor" strokeWidth="1.1" />
-            </svg>
-          </button>
-          <button
-            type="button"
-            className="arg-app-ctl"
-            aria-label={handlers.maximized ? "向下还原" : "最大化"}
-            title={handlers.maximized ? "向下还原" : "最大化"}
-            onClick={handlers.onMaximize}
-          >
-            <svg viewBox="0 0 10 10" width="10" height="10" aria-hidden="true">
-              <rect
-                x="1.5"
-                y="1.5"
-                width="7"
-                height="7"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.1"
-              />
-            </svg>
-          </button>
-          <button
-            type="button"
-            className="arg-app-ctl arg-app-ctl-close"
-            aria-label="关闭"
-            title="关闭"
-            onClick={handlers.onClose}
-          >
-            <svg viewBox="0 0 10 10" width="10" height="10" aria-hidden="true">
-              <path
-                d="M1.5 1.5l7 7M8.5 1.5l-7 7"
-                stroke="currentColor"
-                strokeWidth="1.1"
-              />
-            </svg>
-          </button>
+          <div className="arg-app-controls">
+            <button
+              type="button"
+              className="arg-app-ctl"
+              aria-label="最小化"
+              title="最小化"
+              onClick={handlers.onMinimize}
+            >
+              <svg
+                viewBox="0 0 10 10"
+                width="10"
+                height="10"
+                aria-hidden="true"
+              >
+                <path d="M1 5h8" stroke="currentColor" strokeWidth="1.1" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              className="arg-app-ctl"
+              aria-label={handlers.maximized ? "向下还原" : "最大化"}
+              title={handlers.maximized ? "向下还原" : "最大化"}
+              onClick={handlers.onMaximize}
+            >
+              <svg
+                viewBox="0 0 10 10"
+                width="10"
+                height="10"
+                aria-hidden="true"
+              >
+                <rect
+                  x="1.5"
+                  y="1.5"
+                  width="7"
+                  height="7"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.1"
+                />
+              </svg>
+            </button>
+            <button
+              type="button"
+              className="arg-app-ctl arg-app-ctl-close"
+              aria-label="关闭"
+              title="关闭"
+              onClick={handlers.onClose}
+            >
+              <svg
+                viewBox="0 0 10 10"
+                width="10"
+                height="10"
+                aria-hidden="true"
+              >
+                <path
+                  d="M1.5 1.5l7 7M8.5 1.5l-7 7"
+                  stroke="currentColor"
+                  strokeWidth="1.1"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div className="arg-mail-main">
+          <aside className="arg-mail-side">
+            <div className="arg-mail-account">{prologue.host.account}</div>
+            {prologue.mailbox.folders.map((folder) => (
+              <div
+                key={folder}
+                className="arg-mail-folder"
+                data-active={
+                  folder === prologue.mailbox.activeFolder ? "true" : "false"
+                }
+              >
+                {folder}
+              </div>
+            ))}
+          </aside>
+
+          <section className="arg-mail-list">
+            {prologue.emails.map((email) => (
+              <button
+                key={email.id}
+                type="button"
+                className="arg-mail-item"
+                data-active={email.id === selectedId ? "true" : "false"}
+                data-unread={email.unread ? "true" : "false"}
+                onClick={() => setSelectedId(email.id)}
+              >
+                <div className="arg-mail-item-top">
+                  <span className="arg-mail-from">{email.fromName}</span>
+                  <span className="arg-mail-time">{email.time}</span>
+                </div>
+                <div className="arg-mail-subject">{email.subject}</div>
+                <div className="arg-mail-tagline">
+                  {email.tag ? (
+                    <span className="arg-mail-tag">{email.tag}</span>
+                  ) : null}
+                  {email.unread ? (
+                    <span className="arg-mail-unread" aria-label="未读" />
+                  ) : null}
+                </div>
+              </button>
+            ))}
+          </section>
+
+          {selected ? (
+            <article className="arg-mail-read">
+              <header className="arg-mail-read-head">
+                <h2>{selected.subject}</h2>
+                <div className="arg-mail-meta">
+                  <span>
+                    {selected.fromName} &lt;{selected.from}&gt; ·{" "}
+                    {selected.time}
+                  </span>
+                  <button
+                    type="button"
+                    className="arg-mail-source-toggle"
+                    onClick={() => setMailSource((value) => !value)}
+                  >
+                    {mailSource ? "隐藏原文" : "查看原文"}
+                  </button>
+                </div>
+              </header>
+
+              <div className="arg-mail-read-body win11Scroll">
+                {mailSource && headers ? (
+                  <pre className="arg-mail-source">{headers.join("\n")}</pre>
+                ) : null}
+                <ContentBlocks blocks={selected.blocks} />
+              </div>
+
+              {selected.action ? (
+                <div className="arg-mail-action">
+                  <button type="button" onClick={connect}>
+                    {selected.action.label}
+                  </button>
+                  <div className="arg-mail-action-hint">
+                    {selected.action.hint}
+                  </div>
+                </div>
+              ) : null}
+            </article>
+          ) : null}
         </div>
       </div>
-
-      <div className="arg-mail-main">
-        <aside className="arg-mail-side">
-          <div className="arg-mail-account">{prologue.host.account}</div>
-          {prologue.mailbox.folders.map((folder) => (
-            <div
-              key={folder}
-              className="arg-mail-folder"
-              data-active={
-                folder === prologue.mailbox.activeFolder ? "true" : "false"
-              }
-            >
-              {folder}
-            </div>
-          ))}
-        </aside>
-
-        <section className="arg-mail-list">
-          {prologue.emails.map((email) => (
-            <button
-              key={email.id}
-              type="button"
-              className="arg-mail-item"
-              data-active={email.id === selectedId ? "true" : "false"}
-              data-unread={email.unread ? "true" : "false"}
-              onClick={() => setSelectedId(email.id)}
-            >
-              <div className="arg-mail-item-top">
-                <span className="arg-mail-from">{email.fromName}</span>
-                <span className="arg-mail-time">{email.time}</span>
-              </div>
-              <div className="arg-mail-subject">{email.subject}</div>
-              <div className="arg-mail-tagline">
-                {email.tag ? <span className="arg-mail-tag">{email.tag}</span> : null}
-                {email.unread ? (
-                  <span className="arg-mail-unread" aria-label="未读" />
-                ) : null}
-              </div>
-            </button>
-          ))}
-        </section>
-
-        {selected ? (
-          <article className="arg-mail-read">
-            <header className="arg-mail-read-head">
-              <h2>{selected.subject}</h2>
-              <div className="arg-mail-meta">
-                <span>
-                  {selected.fromName} &lt;{selected.from}&gt; · {selected.time}
-                </span>
-                <button
-                  type="button"
-                  className="arg-mail-source-toggle"
-                  onClick={() => setMailSource((value) => !value)}
-                >
-                  {mailSource ? "隐藏原文" : "查看原文"}
-                </button>
-              </div>
-            </header>
-
-            <div className="arg-mail-read-body win11Scroll">
-              {mailSource && headers ? (
-                <pre className="arg-mail-source">{headers.join("\n")}</pre>
-              ) : null}
-              <ContentBlocks blocks={selected.blocks} />
-            </div>
-
-            {selected.action ? (
-              <div className="arg-mail-action">
-                <button type="button" onClick={connect}>
-                  {selected.action.label}
-                </button>
-                <div className="arg-mail-action-hint">
-                  {selected.action.hint}
-                </div>
-              </div>
-            ) : null}
-          </article>
-        ) : null}
-      </div>
-    </div>
     );
   };
 
@@ -710,7 +746,11 @@ const Prologue = () => {
               className="arg-desk-icon"
               draggable
               data-selected={selectedIcon === icon.id ? "true" : "false"}
-              data-open={openWindows.some((item) => item.id === icon.id) ? "true" : "false"}
+              data-open={
+                openWindows.some((item) => item.id === icon.id)
+                  ? "true"
+                  : "false"
+              }
               onClick={(event) => {
                 event.stopPropagation();
                 setSelectedIcon(icon.id);
@@ -746,7 +786,11 @@ const Prologue = () => {
               }}
             >
               <span className="arg-desk-icon-img">
-                <img src={`img/icon/${icon.icon}.png`} alt="" draggable="false" />
+                <img
+                  src={`img/icon/${icon.icon}.png`}
+                  alt=""
+                  draggable="false"
+                />
               </span>
               <span className="arg-desk-icon-label">{icon.label}</span>
             </button>
@@ -906,7 +950,9 @@ const Prologue = () => {
                 <div className="arg-start-recent-title">最近使用</div>
                 <div className="arg-start-recent-list">
                   {recentApps
-                    .map((id) => prologue.desktopIcons.find((icon) => icon.id === id))
+                    .map((id) =>
+                      prologue.desktopIcons.find((icon) => icon.id === id),
+                    )
                     .filter(Boolean)
                     .map((icon) => (
                       <button

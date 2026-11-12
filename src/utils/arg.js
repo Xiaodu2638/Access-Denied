@@ -19,7 +19,10 @@ export const verifyLockAnswer = (answer) =>
 // 远程机器被挂起在事故那一刻，所以桌面、任务栏、日历、设置页统一停在
 // 2031-04-19 03:42，不再受真实系统时间影响。
 export const argClockDate = () => {
-  const [year, month, day] = timeline.incident.split(" ")[0].split("-").map(Number);
+  const [year, month, day] = timeline.incident
+    .split(" ")[0]
+    .split("-")
+    .map(Number);
   const date = new Date();
   date.setFullYear(year, month - 1, day);
   date.setHours(timeline.desktopClock.hour, timeline.desktopClock.minute, 0, 0);

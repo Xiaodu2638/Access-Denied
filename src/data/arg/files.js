@@ -200,9 +200,7 @@ export const fileTree = {
               description: "1.2 KB · 2031-04-19 03:42",
               content: [
                 { type: "h", text: "linche-agent" },
-                block(
-                  "给它一个目标。它会自己读 issue、改代码、跑测试、提交。",
-                ),
+                block("给它一个目标。它会自己读 issue、改代码、跑测试、提交。"),
                 { type: "code", text: "npm run agent -- --target ./repo" },
                 block("--self-preserve 默认开启。关掉它 agent 会退出。"),
                 block("运行状态写在 .session。"),
@@ -220,7 +218,9 @@ export const fileTree = {
                     { type: "code", text: "npm run agent -- --target ./repo" },
                     block("--self-preserve 默认开启。关掉它 agent 会退出。"),
                     block("运行状态写在 .session。"),
-                    block("2024 年 11 月 8 日，我三十岁。这个项目是那天开始的。"),
+                    block(
+                      "2024 年 11 月 8 日，我三十岁。这个项目是那天开始的。",
+                    ),
                     block("最后修改：2031-04-19 03:42 · linche"),
                   ],
                 },
@@ -321,7 +321,10 @@ export const fileTree = {
               kind: "txt",
               description: "7.0 KB · 2024-11-08",
               content: [
-                { type: "code", text: "CC0 1.0 Universal\n\nTo the extent possible under law, the author has waived all\ncopyright and related or neighboring rights to this work." },
+                {
+                  type: "code",
+                  text: "CC0 1.0 Universal\n\nTo the extent possible under law, the author has waived all\ncopyright and related or neighboring rights to this work.",
+                },
               ],
             },
             data: "",
@@ -491,17 +494,13 @@ export const fileTree = {
                     block(
                       "1. 项目被视为资产。资产的价值在于持续运转，不取决于维护者。",
                     ),
-                    block(
-                      "2. 维护者连续 72 小时无响应，视为放弃维护权。",
-                    ),
+                    block("2. 维护者连续 72 小时无响应，视为放弃维护权。"),
                     block(
                       "3. 放弃后由本组指派替代身份，保持提交、issue 与发布节奏不变。",
                     ),
                     block("4. 替代身份与原身份不构成继承关系。"),
                     block("5. 原身份可选择归档、被替换，或命名。"),
-                    block(
-                      "6. 命名需原身份在场。自 2017 年后无成功记录。",
-                    ),
+                    block("6. 命名需原身份在场。自 2017 年后无成功记录。"),
                   ],
                 },
                 data: "",
@@ -575,11 +574,7 @@ const buildSystem = (raw) => {
     return id;
   };
 
-  const rootId = add(
-    { ...raw["%user%"], name: "linche" },
-    null,
-    "%user%",
-  );
+  const rootId = add({ ...raw["%user%"], name: "linche" }, null, "%user%");
 
   return { nodes, rootId };
 };
@@ -622,9 +617,7 @@ export const contentOf = (node, flags) => {
   if (node.variants && flags) {
     const hit = node.variants.find(
       (variant) =>
-        variant.flag &&
-        flags[variant.flag] === true &&
-        variant.content,
+        variant.flag && flags[variant.flag] === true && variant.content,
     );
     if (hit) return hit.content;
   }

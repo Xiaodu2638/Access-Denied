@@ -25,9 +25,9 @@ String.prototype.count = function (c) {
 
 export const Icon = (props) => {
   const sidepane = useSelector((state) => state.sidepane);
-  const restored = useSelector((state) => state.arg && state.arg.flags
-    ? state.arg.flags.restored
-    : false);
+  const restored = useSelector((state) =>
+    state.arg && state.arg.flags ? state.arg.flags.restored : false,
+  );
 
   const dispatch = useDispatch();
   // 回收站有内容（还没 restore）时用满的图标，恢复后就剩空桶。

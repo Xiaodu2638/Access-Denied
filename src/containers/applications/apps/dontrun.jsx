@@ -71,7 +71,12 @@ export const DontRun = () => {
               disabled={ran}
               onClick={run}
             >
-              <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true">
+              <svg
+                viewBox="0 0 16 16"
+                width="13"
+                height="13"
+                aria-hidden="true"
+              >
                 <path d="M5 3.2v9.6L13 8z" fill="currentColor" />
               </svg>
             </button>
@@ -82,9 +87,7 @@ export const DontRun = () => {
 
           {output ? (
             <div className="arg-dontrun-output">
-              <div className="arg-dontrun-output-title">
-                {runResult.title}
-              </div>
+              <div className="arg-dontrun-output-title">{runResult.title}</div>
               {runResult.lines.map((line, index) => (
                 <div
                   key={index}

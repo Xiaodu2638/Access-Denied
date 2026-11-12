@@ -13,13 +13,19 @@ const deskReducer = (state = defState, action) => {
     case "DESKREM":
       var arr = state.apps.filter((x) => x.name != action.payload);
 
-      localStorage.setItem("arg_desktop", JSON.stringify(arr.map((x) => x.name)));
+      localStorage.setItem(
+        "arg_desktop",
+        JSON.stringify(arr.map((x) => x.name)),
+      );
       return { ...state, apps: arr };
     case "DESKADD":
       var arr = [...state.apps];
       arr.push(action.payload);
 
-      localStorage.setItem("arg_desktop", JSON.stringify(arr.map((x) => x.name)));
+      localStorage.setItem(
+        "arg_desktop",
+        JSON.stringify(arr.map((x) => x.name)),
+      );
       return { ...state, apps: arr };
     case "DESKHIDE":
       return {
