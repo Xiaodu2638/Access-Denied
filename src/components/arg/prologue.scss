@@ -1,0 +1,2587 @@
+// 引子：主角自己的桌面（浅色）与邮件窗口。
+// 与 ARG 的深色桌面形成明确区分。
+
+.arg-prologue {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  overflow: hidden;
+  font-family: "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+  color: #1f2328;
+  background: #e8eef6;
+  user-select: none;
+}
+
+.arg-prologue-wallpaper {
+  position: absolute;
+  inset: 0;
+  // 开发者桌面用深色壁纸，和后面的 ARG 冷色桌面形成"同一台机器"的连贯感。
+  background: url("img/wallpaper/dark/img0.jpg") center / cover no-repeat;
+}
+
+// 深色壁纸下图标文字需要反白。
+.arg-prologue {
+  color: #f0f6fc;
+}
+
+.arg-desk-icon-label {
+  display: block;
+  color: #fff;
+  text-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.7),
+    0 0 8px rgba(0, 0, 0, 0.5);
+}
+
+.arg-prologue-desktop {
+  position: absolute;
+  inset: 0 0 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.arg-prologue-icons {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 4px;
+  max-height: calc(100vh - 110px);
+}
+
+.arg-desk-icon {
+  width: 78px;
+  padding: 6px 4px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: transparent;
+  color: #1f2328;
+  font-size: 11px;
+  line-height: 1.4;
+  cursor: pointer;
+  transition:
+    background 140ms ease,
+    border-color 140ms ease,
+    transform 120ms ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.42);
+    border-color: rgba(255, 255, 255, 0.6);
+  }
+
+  // 单击选中，和资源管理器一致。
+  &[data-selected="true"] {
+    border-color: rgba(15, 108, 189, 0.45);
+    background: rgba(15, 108, 189, 0.16);
+  }
+
+  // 已打开的应用在图标上压一层浅底，提示窗口还在。
+  &[data-open="true"]:not([data-selected="true"]) {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+
+  // 拖拽时半透明，提示正在移动。
+  &:active,
+  &[draggable="true"]:active {
+    cursor: grabbing;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #0f6cbd;
+    outline-offset: 1px;
+  }
+}
+
+.arg-desk-icon-img {
+  position: relative;
+  display: block;
+  width: 42px;
+  height: 42px;
+  margin: 0 auto 4px;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 3px rgba(20, 40, 70, 0.18));
+  }
+}
+
+// 邮件窗口
+.arg-mail-window {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(1020px, calc(100vw - 220px));
+  height: min(640px, 80vh);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 10px;
+  background: #fff;
+  box-shadow:
+    0 30px 80px rgba(20, 40, 70, 0.28),
+    0 2px 8px rgba(20, 40, 70, 0.12);
+  animation: arg-mail-in 420ms ease-out both;
+}
+
+@keyframes arg-mail-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.995);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.arg-mail-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 40px;
+  padding: 0 8px 0 14px;
+  background: #f3f5f8;
+  border-bottom: 1px solid #e3e7ec;
+  font-size: 12px;
+  color: #4a5563;
+}
+
+.arg-mail-appname {
+  font-weight: 600;
+  color: #1f2328;
+}
+
+.arg-mail-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.arg-mail-close {
+  width: 32px;
+  height: 28px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: #4a5563;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover {
+    background: #e81123;
+    color: #fff;
+  }
+}
+
+.arg-mail-main {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 176px 296px minmax(0, 1fr);
+}
+
+.arg-mail-side {
+  padding: 14px 10px;
+  background: #f7f8fa;
+  border-right: 1px solid #e8ebef;
+  font-size: 12px;
+}
+
+.arg-mail-account {
+  margin-bottom: 12px;
+  padding: 0 8px;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  color: #7a8794;
+  word-break: break-all;
+}
+
+.arg-mail-folder {
+  padding: 7px 10px;
+  border-radius: 5px;
+  color: #3d4752;
+  cursor: default;
+
+  &[data-active="true"] {
+    background: #e4eef9;
+    color: #0f5c9e;
+    font-weight: 600;
+  }
+}
+
+.arg-mail-list {
+  overflow-y: auto;
+  border-right: 1px solid #e8ebef;
+  background: #fff;
+}
+
+.arg-mail-item {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 12px 14px;
+  border: none;
+  border-bottom: 1px solid #eef1f4;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+
+  &:hover {
+    background: #f5f8fb;
+  }
+
+  &[data-active="true"] {
+    background: #eaf3fc;
+  }
+
+  &[data-active="true"]::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 3px;
+    background: #0f6cbd;
+  }
+}
+
+.arg-mail-item-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.arg-mail-from {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1f2328;
+}
+
+.arg-mail-time {
+  flex: none;
+  font-size: 10px;
+  color: #8a96a3;
+}
+
+.arg-mail-subject {
+  margin-top: 3px;
+  overflow: hidden;
+  font-size: 12px;
+  color: #3d4752;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.arg-mail-item[data-unread="true"] {
+  .arg-mail-from {
+    font-weight: 700;
+    color: #1f2328;
+  }
+
+  .arg-mail-subject {
+    font-weight: 600;
+    color: #1f2328;
+  }
+}
+
+.arg-mail-tagline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 5px;
+}
+
+.arg-mail-tag {
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: #eef1f4;
+  font-size: 9px;
+  letter-spacing: 0.5px;
+  color: #6b7785;
+}
+
+.arg-mail-unread {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #0f6cbd;
+}
+
+.arg-mail-read {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  background: #fff;
+}
+
+.arg-mail-read-head {
+  padding: 20px 24px 14px;
+  border-bottom: 1px solid #eef1f4;
+
+  h2 {
+    margin: 0;
+    font-size: 19px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: #1f2328;
+  }
+}
+
+.arg-mail-meta {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  font-size: 11px;
+  color: #7a8794;
+  word-break: break-all;
+}
+
+.arg-mail-source-toggle {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #0f6cbd;
+  font-size: 11px;
+  line-height: 1.4;
+  cursor: pointer;
+  opacity: 0.75;
+
+  &:hover {
+    opacity: 1;
+    text-decoration: underline;
+  }
+}
+
+.arg-mail-source {
+  margin: 0 0 16px;
+  padding: 10px 12px;
+  border: 1px solid #e3e8ee;
+  border-radius: 4px;
+  background: #f6f8fa;
+  color: #5c6874;
+  font-family: "Consolas", "Cascadia Mono", monospace;
+  font-size: 11px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.arg-mail-read-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 18px 24px 24px;
+
+  --arg-fg: #2b333c;
+  --arg-fg-strong: #1f2328;
+  --arg-muted: #5c6874;
+  --arg-accent: #0f6cbd;
+  --arg-code-bg: #f2f5f8;
+  --arg-code-fg: #24303c;
+  --arg-hint-bg: #fdf6e3;
+  --arg-hint-fg: #6b4e00;
+
+  .arg-blocks {
+    font-size: 13px;
+    line-height: 1.9;
+  }
+
+  .arg-block-code {
+    border: 1px solid #e3e8ee;
+  }
+}
+
+.arg-mail-action {
+  padding: 14px 24px 20px;
+  border-top: 1px solid #eef1f4;
+  background: #fbfcfd;
+
+  button {
+    padding: 9px 20px;
+    border: 1px solid #0f6cbd;
+    border-radius: 4px;
+    background: #0f6cbd;
+    color: #fff;
+    font-size: 13px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: background 140ms ease;
+
+    &:hover {
+      background: #0c5a9e;
+    }
+  }
+}
+
+.arg-mail-action-hint {
+  margin-top: 7px;
+  font-size: 10px;
+  color: #8a96a3;
+}
+
+// 任务栏
+.arg-prologue-taskbar {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  height: 48px;
+  padding: 0 14px;
+  background: rgba(255, 255, 255, 0.72);
+  border-top: 1px solid rgba(255, 255, 255, 0.85);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+}
+
+.arg-taskbar-left {
+  flex: 1;
+}
+
+.arg-taskbar-start {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(15, 108, 189, 0.1);
+  }
+
+  img {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+  }
+
+  &[data-open="true"] {
+    background: rgba(15, 108, 189, 0.12);
+  }
+}
+
+.arg-taskbar-apps {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.arg-taskbar-app {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 34px;
+  padding: 0;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  cursor: pointer;
+  transition: background 120ms ease;
+
+  &:hover {
+    background: rgba(15, 108, 189, 0.12);
+  }
+
+  // 窗口开着但不在最前：浅底 + 短指示线。
+  &[data-running="true"] {
+    background: rgba(15, 108, 189, 0.1);
+  }
+
+  // 当前活动窗口：明显的浅蓝底 + 白色描边，和 Win11 的活动任务栏按钮一致。
+  &[data-active="true"] {
+    background: rgba(15, 108, 189, 0.22);
+    box-shadow: inset 0 0 0 1px rgba(15, 108, 189, 0.35);
+  }
+
+  img {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+  }
+}
+
+// 任务栏运行指示条：Windows 11 里是图标下方的一小段横线。
+.arg-taskbar-dot {
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  width: 0;
+  height: 3px;
+  border-radius: 2px;
+  background: #0f6cbd;
+  transform: translateX(-50%);
+  transition: width 160ms ease;
+}
+
+.arg-taskbar-app[data-running="true"] .arg-taskbar-dot {
+  width: 7px;
+}
+
+.arg-taskbar-app[data-active="true"] .arg-taskbar-dot {
+  width: 15px;
+}
+
+.arg-taskbar-clock {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  font-size: 10px;
+  line-height: 1.3;
+  color: #3d4752;
+}
+
+// 窗口外壳：负责拖动与层级，窗口本身仍然是 .arg-app-window / .arg-mail-window。
+// 注意：居中靠内联的 translate(-50%,-50%)，所以这里的动画只能用 opacity，
+// 任何 transform 动画都会覆盖掉内联位移，把窗口推到右下角。
+.arg-win-host {
+  position: absolute;
+  will-change: left, top, opacity;
+  animation: arg-win-open 200ms ease-out both;
+  transition:
+    left 220ms cubic-bezier(0.2, 0.9, 0.3, 1),
+    top 220ms cubic-bezier(0.2, 0.9, 0.3, 1),
+    opacity 160ms ease,
+    transform 220ms cubic-bezier(0.2, 0.9, 0.3, 1);
+
+  // 最大化的瞬间不参与位置过渡，避免从居中跳到全屏时出现滑动残影。
+  &[data-maximized="true"] {
+    transition: opacity 160ms ease;
+  }
+
+  // 拖动过程中必须关掉 left/top 过渡，否则窗口会追不上指针。
+  &[data-dragging="true"] {
+    transition: none;
+  }
+
+  // 最小化：收起到任务栏方向。
+  &[data-minimized="true"] {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  // 非活动窗口稍微退后一点，靠阴影和亮度区分。
+  &:not([data-active="true"]) {
+    .arg-app-window,
+    .arg-mail-window {
+      box-shadow:
+        0 16px 40px rgba(20, 40, 70, 0.2),
+        0 1px 4px rgba(20, 40, 70, 0.1);
+    }
+  }
+}
+
+@keyframes arg-win-open {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+// 桌面右键菜单
+.arg-desk-menu {
+  position: fixed;
+  z-index: 30;
+  min-width: 176px;
+  padding: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 7px;
+  background: rgba(249, 251, 253, 0.96);
+  box-shadow: 0 14px 34px rgba(20, 40, 70, 0.22);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  animation: arg-menu-in 140ms ease-out both;
+}
+
+@keyframes arg-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.arg-desk-menu-item {
+  display: block;
+  width: 100%;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: #1f2328;
+  font-family: inherit;
+  font-size: 11.5px;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(15, 108, 189, 0.12);
+  }
+
+  &[data-disabled="true"] {
+    color: #9aa4b1;
+    cursor: default;
+
+    &:hover {
+      background: transparent;
+    }
+  }
+}
+
+.arg-desk-menu-sep {
+  height: 1px;
+  margin: 4px 8px;
+  background: #e3e7ec;
+}
+
+// 普通应用窗口
+.arg-app-window {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  width: min(860px, calc(100vw - 240px));
+  height: min(540px, 74vh);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  background: #f7f9fb;
+  box-shadow:
+    0 30px 80px rgba(20, 40, 70, 0.26),
+    0 2px 8px rgba(20, 40, 70, 0.12);
+  animation: arg-mail-in 320ms ease-out both;
+}
+
+.arg-app-titlebar {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 6px 0 12px;
+  background: #eef2f6;
+  border-bottom: 1px solid #dfe5ec;
+}
+
+.arg-app-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.arg-app-title {
+  font-size: 12px;
+  color: #1f2328;
+}
+
+.arg-app-subtitle {
+  overflow: hidden;
+  font-size: 11px;
+  color: #7a8694;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.arg-app-close {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 26px;
+  margin-left: auto;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: #55616e;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover {
+    background: #d13438;
+    color: #fff;
+  }
+}
+
+// 标题栏右侧的三个控制按钮（最小化 / 最大化 / 关闭）
+.arg-app-controls {
+  display: flex;
+  flex: none;
+  align-items: stretch;
+  align-self: stretch;
+  margin-left: auto;
+}
+
+.arg-app-ctl {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  border: none;
+  background: transparent;
+  color: #55616e;
+  cursor: pointer;
+  transition: background 120ms ease;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.07);
+  }
+}
+
+.arg-app-ctl-close:hover {
+  background: #d13438;
+  color: #fff;
+}
+
+// 最大化：铺满桌面区域，去掉圆角。
+.arg-app-window[data-maximized="true"] {
+  border-radius: 0;
+}
+
+// 吸附预览：拖动到边缘时显示的半透明占位块。
+.arg-snap-preview {
+  position: absolute;
+  z-index: 9;
+  border: 2px solid rgba(76, 194, 255, 0.75);
+  border-radius: 8px;
+  background: rgba(76, 194, 255, 0.16);
+  pointer-events: none;
+  animation: arg-snap-in 140ms ease-out both;
+
+  &[data-zone="top"] {
+    top: 8px;
+    left: 8px;
+    width: calc(100% - 16px);
+    height: calc(100% - 64px);
+  }
+
+  &[data-zone="left"] {
+    top: 8px;
+    left: 8px;
+    width: calc(50% - 12px);
+    height: calc(100% - 64px);
+  }
+
+  &[data-zone="right"] {
+    top: 8px;
+    right: 8px;
+    width: calc(50% - 12px);
+    height: calc(100% - 64px);
+  }
+}
+
+@keyframes arg-snap-in {
+  from {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// Alt+Tab 切换面板
+.arg-switcher {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 40;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 10px;
+  width: min(560px, 86vw);
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 10px;
+  background: rgba(32, 32, 36, 0.9);
+  box-shadow: 0 26px 60px rgba(0, 0, 0, 0.45);
+  transform: translate(-50%, -50%);
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+  animation: arg-switcher-in 140ms ease-out both;
+}
+
+@keyframes arg-switcher-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.arg-switcher-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  width: 92px;
+  padding: 12px 6px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: #c9d1d9;
+  font-size: 11px;
+
+  img {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+  }
+
+  &[data-active="true"] {
+    border-color: rgba(76, 194, 255, 0.6);
+    background: rgba(76, 194, 255, 0.14);
+    color: #f0f6fc;
+  }
+}
+
+.arg-switcher-hint {
+  flex-basis: 100%;
+  margin-top: 4px;
+  font-family: "Consolas", "Cascadia Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: #6e7b8a;
+  text-align: center;
+}
+
+.arg-app-content {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  background: #fff;
+}
+
+// 此电脑
+.arg-pc-main {
+  display: flex;
+  height: 100%;
+}
+
+.arg-pc-side {
+  flex: none;
+  width: 168px;
+  padding: 12px 8px;
+  border-right: 1px solid #e6ebf1;
+  background: #fafbfc;
+}
+
+.arg-pc-side-title {
+  padding: 8px 10px 4px;
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: #8b96a3;
+}
+
+.arg-pc-side-item {
+  display: block;
+  width: 100%;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: #3d4752;
+  font-family: inherit;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(15, 108, 189, 0.07);
+  }
+
+  &[data-active="true"] {
+    background: rgba(15, 108, 189, 0.1);
+    color: #0f6cbd;
+  }
+}
+
+.arg-pc-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.arg-pc-breadcrumb {
+  padding: 10px 16px;
+  border-bottom: 1px solid #eef2f6;
+  font-size: 11px;
+  color: #7a8694;
+}
+
+.arg-pc-grid {
+  display: grid;
+  flex: 1;
+  align-content: flex-start;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 6px;
+  padding: 16px;
+}
+
+.arg-pc-folder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 4px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: transparent;
+  color: #3d4752;
+  font-family: inherit;
+  font-size: 11px;
+  cursor: pointer;
+
+  &:hover {
+    border-color: rgba(15, 108, 189, 0.2);
+    background: rgba(15, 108, 189, 0.07);
+  }
+
+  img {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    opacity: 0.85;
+  }
+}
+
+.arg-pc-status {
+  padding: 8px 16px;
+  border-top: 1px solid #eef2f6;
+  font-size: 10px;
+  color: #8b96a3;
+}
+
+// 浏览器
+.arg-browser-tabbar {
+  display: flex;
+  flex: none;
+  align-items: flex-end;
+  gap: 4px;
+  padding: 6px 8px 0;
+  background: #e9edf2;
+}
+
+.arg-browser-tab {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  max-width: 220px;
+  padding: 6px 10px;
+  border-radius: 6px 6px 0 0;
+  background: #f4f7fa;
+  font-size: 11px;
+  color: #3d4752;
+
+  span:nth-child(2) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.arg-browser-tab-dot {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  background: #0f6cbd;
+}
+
+.arg-browser-tab-x {
+  flex: none;
+  margin-left: 4px;
+  color: #8b96a3;
+  font-size: 12px;
+}
+
+.arg-browser-tab-add {
+  padding: 4px 9px 6px;
+  font-size: 13px;
+  color: #8b96a3;
+}
+
+.arg-browser-marks {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px 12px;
+  border-bottom: 1px solid #eef2f6;
+  background: #f4f7fa;
+}
+
+.arg-browser-mark {
+  padding: 3px 10px;
+  border: 1px solid #dfe5ec;
+  border-radius: 12px;
+  background: #fff;
+  color: #55616e;
+  font-family: inherit;
+  font-size: 10px;
+  cursor: pointer;
+
+  &:hover {
+    border-color: rgba(15, 108, 189, 0.45);
+    color: #0f6cbd;
+  }
+
+  &[data-active="true"] {
+    border-color: rgba(15, 108, 189, 0.5);
+    background: rgba(15, 108, 189, 0.09);
+    color: #0f6cbd;
+  }
+}
+
+.arg-browser-bar {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border-bottom: 1px solid #eef2f6;
+  background: #f4f7fa;
+}
+
+.arg-browser-nav {
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 12px;
+  color: #8b96a3;
+  cursor: pointer;
+
+  &:hover:not([data-disabled="true"]) {
+    color: #0f6cbd;
+  }
+
+  &[data-disabled="true"] {
+    color: #c3ccd6;
+    cursor: default;
+  }
+}
+
+.arg-browser-address {
+  flex: 1;
+  padding: 4px 12px;
+  border: 1px solid #dfe5ec;
+  border-radius: 14px;
+  background: #fff;
+  font-family: "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+  font-size: 11px;
+  color: #55616e;
+  outline: none;
+
+  &:focus {
+    border-color: rgba(15, 108, 189, 0.5);
+  }
+}
+
+.arg-browser-doc {
+  padding: 28px 32px;
+  font-size: 12px;
+  line-height: 1.9;
+  color: #3d4752;
+
+  p {
+    margin: 0 0 10px;
+  }
+
+  p[data-lead="true"] {
+    font-size: 17px;
+    font-weight: 600;
+    color: #1f2328;
+  }
+}
+
+.arg-browser-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 46px 24px 24px;
+}
+
+.arg-browser-logo {
+  font-size: 32px;
+  font-weight: 300;
+  color: #0f6cbd;
+}
+
+.arg-browser-search {
+  width: min(420px, 100%);
+  margin-top: 20px;
+  padding: 9px 16px;
+  border: 1px solid #dfe5ec;
+  border-radius: 18px;
+  background: #fff;
+  font-size: 11px;
+  color: #9aa4b1;
+}
+
+.arg-browser-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.arg-browser-link {
+  padding: 6px 12px;
+  border: 1px solid #e6ebf1;
+  border-radius: 5px;
+  background: #fafbfc;
+  font-size: 11px;
+  color: #55616e;
+}
+
+.arg-browser-recent {
+  width: min(420px, 100%);
+  margin-top: 34px;
+}
+
+.arg-browser-recent-title {
+  margin-bottom: 8px;
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: #8b96a3;
+}
+
+.arg-browser-recent-item {
+  display: block;
+  width: 100%;
+  padding: 7px 0;
+  border: none;
+  border-bottom: 1px solid #f1f4f7;
+  background: transparent;
+  font-family: inherit;
+  font-size: 11px;
+  color: #3d4752;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    color: #0f6cbd;
+  }
+}
+
+.arg-browser-error {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 60px 48px;
+}
+
+.arg-browser-error-code {
+  font-size: 15px;
+  color: #1f2328;
+}
+
+.arg-browser-error-text {
+  font-size: 12px;
+  color: #55616e;
+}
+
+.arg-browser-error-detail {
+  font-family: "Consolas", "Cascadia Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: #9aa4b1;
+}
+
+.arg-browser-back {
+  margin-top: 14px;
+  padding: 6px 14px;
+  border: 1px solid #dfe5ec;
+  border-radius: 4px;
+  background: #fafbfc;
+  font-family: inherit;
+  font-size: 11px;
+  color: #3d4752;
+  cursor: pointer;
+
+  &:hover {
+    background: #eef2f6;
+  }
+}
+
+// 记事本
+.arg-note-menu {
+  flex: none;
+  padding: 5px 12px;
+  border-bottom: 1px solid #eef2f6;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: #8b96a3;
+}
+
+.arg-note-text {
+  margin: 0;
+  padding: 18px 22px;
+  font-family: "Consolas", "Cascadia Mono", monospace;
+  font-size: 12px;
+  line-height: 1.9;
+  color: #3d4752;
+  white-space: pre-wrap;
+}
+
+// 计算器
+.arg-calc-window {
+  width: min(320px, calc(100vw - 60px));
+  height: min(460px, 80vh);
+}
+
+// 回收站和设置按各自的惯用尺寸显示，不要都撑成主窗口那么大。
+.arg-bin-window {
+  width: min(560px, calc(100vw - 240px));
+  height: min(420px, 70vh);
+}
+
+.arg-settings-window {
+  width: min(720px, calc(100vw - 240px));
+  height: min(500px, 72vh);
+}
+
+.arg-calc-display {
+  flex: none;
+  padding: 14px 18px;
+  background: #f7f9fb;
+  border-bottom: 1px solid #eef2f6;
+  font-size: 26px;
+  font-weight: 300;
+  color: #1f2328;
+  text-align: right;
+}
+
+.arg-calc-grid {
+  display: grid;
+  flex: 1;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+  padding: 8px;
+
+  button {
+    border: 1px solid #eef2f6;
+    border-radius: 4px;
+    background: #fafbfc;
+    font-family: inherit;
+    font-size: 14px;
+    color: #1f2328;
+    cursor: pointer;
+
+    &:hover {
+      background: #eef2f6;
+    }
+  }
+}
+
+.arg-calc-op {
+  color: #0f6cbd !important;
+}
+
+.arg-calc-equals {
+  background: #0f6cbd !important;
+  color: #fff !important;
+}
+
+// 设置
+.arg-settings-main {
+  display: flex;
+  height: 100%;
+}
+
+.arg-settings-side {
+  flex: none;
+  width: 176px;
+  padding: 12px 8px;
+  border-right: 1px solid #e6ebf1;
+  background: #fafbfc;
+
+  div {
+    padding: 7px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #3d4752;
+    cursor: default;
+  }
+
+  div[data-active="true"] {
+    background: rgba(15, 108, 189, 0.1);
+    color: #0f6cbd;
+  }
+}
+
+.arg-settings-content {
+  flex: 1;
+  min-width: 0;
+  padding: 22px 26px;
+
+  h3 {
+    margin: 0 0 16px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1f2328;
+  }
+
+  dl {
+    margin: 0;
+
+    div {
+      display: flex;
+      gap: 16px;
+      padding: 7px 0;
+      border-bottom: 1px solid #f1f4f7;
+      font-size: 11px;
+    }
+  }
+
+  dt {
+    flex: none;
+    width: 108px;
+    color: #8b96a3;
+  }
+
+  dd {
+    margin: 0;
+    color: #3d4752;
+  }
+}
+
+.arg-settings-note {
+  margin-top: 18px;
+  font-size: 10px;
+  color: #8b96a3;
+}
+
+// 回收站
+.arg-bin-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  height: 100%;
+  font-size: 12px;
+  color: #8b96a3;
+
+  img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    opacity: 0.5;
+  }
+}
+
+// 开始菜单
+.arg-start-menu {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  width: min(560px, calc(100vw - 40px));
+  padding: 16px 18px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  background: rgba(249, 251, 253, 0.94);
+  box-shadow: 0 24px 60px rgba(20, 40, 70, 0.26);
+  transform: translateX(-50%);
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+  animation: arg-start-in 200ms ease-out both;
+}
+
+@keyframes arg-start-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.arg-start-search {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 7px 14px;
+  border: 1px solid #dfe5ec;
+  border-radius: 14px;
+  background: #fff;
+  font-family: inherit;
+  font-size: 11px;
+  color: #3d4752;
+  outline: none;
+
+  &::placeholder {
+    color: #9aa4b1;
+  }
+
+  &:focus {
+    border-color: rgba(15, 108, 189, 0.5);
+  }
+}
+
+// 开始菜单的「最近使用」分区
+.arg-start-recent {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #eef2f6;
+}
+
+.arg-start-recent-title {
+  margin-bottom: 6px;
+  padding: 0 4px;
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: #8b96a3;
+}
+
+.arg-start-recent-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.arg-start-recent-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 10px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: #3d4752;
+  font-family: inherit;
+  font-size: 11px;
+  cursor: pointer;
+
+  &:hover {
+    border-color: rgba(15, 108, 189, 0.2);
+    background: rgba(15, 108, 189, 0.07);
+  }
+
+  img {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+  }
+}
+
+.arg-start-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 4px;
+  margin-top: 14px;
+}
+
+.arg-start-app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 2px;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  font-family: inherit;
+  font-size: 10px;
+  color: #3d4752;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(15, 108, 189, 0.08);
+  }
+
+  img {
+    width: 26px;
+    height: 26px;
+    object-fit: contain;
+  }
+}
+
+.arg-start-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid #eef2f6;
+  font-size: 11px;
+  color: #55616e;
+}
+
+// 连接远程桌面
+.arg-connecting {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  background: #05070a;
+  color: #c9d1d9;
+
+  // 结束时不整体淡出，否则会露出引子自己的桌面壁纸。
+  // 改成：容器留在原地，只让文字淡出，
+  // 于是画面和后面的锁屏一模一样，卸载时看不出切换。
+  &[data-done="true"] {
+    .arg-connecting-box {
+      opacity: 0;
+    }
+  }
+}
+
+// 覆盖层自己的壁纸：和锁屏用同一张，并且一开始就是完全不透明。
+// 这样无论时序如何，覆盖层看起来都已经"是那台远程机器"，
+// 卸载时也不会闪出引子的浅色桌面。
+.arg-connecting-wall {
+  position: absolute;
+  inset: 0;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+// 与锁屏同款的压暗层，保证覆盖层和锁屏观感一致。
+.arg-connecting-shade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(10, 20, 35, 0.12), transparent 62%),
+    linear-gradient(180deg, rgba(2, 6, 12, 0.34) 0%, rgba(2, 6, 12, 0.62) 100%);
+}
+
+.arg-connecting-box {
+  position: relative;
+  z-index: 1;
+  width: min(560px, 86vw);
+  font-family: "Consolas", "Cascadia Mono", monospace;
+  transition: opacity 320ms ease;
+}
+
+.arg-connecting-title {
+  font-size: 12px;
+  letter-spacing: 3px;
+  color: #4cc2ff;
+}
+
+.arg-connecting-address {
+  margin-top: 8px;
+  font-size: 20px;
+  letter-spacing: 1px;
+  color: #f0f6fc;
+}
+
+.arg-connecting-lines {
+  min-height: 150px;
+  margin-top: 26px;
+  font-size: 12px;
+  line-height: 2;
+  color: #8b949e;
+}
+
+.arg-connect-line {
+  animation: arg-line-in 260ms ease-out both;
+
+  &[data-warn="true"] {
+    color: #e3b341;
+  }
+}
+
+@keyframes arg-line-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.arg-connect-cursor {
+  display: inline-block;
+  color: #4cc2ff;
+  animation: arg-blink 1s step-end infinite;
+}
+
+@keyframes arg-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+// VS Code 窗口
+.arg-vscode-window {
+  width: min(940px, calc(100vw - 200px));
+  height: min(600px, 80vh);
+  background: #1e1e1e;
+
+  .arg-app-titlebar {
+    background: #323233;
+    border-bottom-color: #252526;
+    color: #ccc;
+  }
+
+  .arg-app-title,
+  .arg-app-subtitle {
+    color: #ccc;
+  }
+
+  // 内容区默认是白色，这里必须覆盖，否则编辑器下方会露出一块白。
+  .arg-app-content {
+    background: #1e1e1e;
+  }
+}
+
+.arg-code-main {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.arg-code-side {
+  flex: none;
+  width: 190px;
+  padding: 8px 0;
+  overflow-y: auto;
+  border-right: 1px solid #252526;
+  background: #252526;
+  font-size: 11px;
+  color: #ccc;
+}
+
+.arg-code-side-title {
+  padding: 0 12px 8px;
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: #8b8b8b;
+}
+
+.arg-code-proj {
+  padding: 0 12px 6px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #e0e0e0;
+}
+
+.arg-code-file {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+  padding: 4px 12px;
+  border: none;
+  background: transparent;
+  color: #bdbdbd;
+  font-family: inherit;
+  font-size: 11px;
+  text-align: left;
+  cursor: pointer;
+
+  &[data-depth="1"] {
+    padding-left: 26px;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  &[data-active="true"] {
+    background: rgba(255, 255, 255, 0.09);
+    color: #fff;
+  }
+
+  &[data-type="folder"] {
+    color: #dcdcdc;
+  }
+}
+
+.arg-code-file-icon {
+  width: 10px;
+  flex: none;
+  color: #8b8b8b;
+}
+
+.arg-code-editor {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  background: #1e1e1e;
+}
+
+.arg-code-tabs {
+  display: flex;
+  flex: none;
+  align-items: flex-end;
+  background: #252526;
+}
+
+.arg-code-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-right: 1px solid #1e1e1e;
+  background: #1e1e1e;
+  font-size: 11px;
+  color: #ccc;
+
+  &[data-active="true"] {
+    color: #fff;
+  }
+}
+
+.arg-code-tab-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: #f1e05a;
+}
+
+.arg-code-tab-x {
+  margin-left: 6px;
+  color: #8b8b8b;
+}
+
+.arg-code-breadcrumb {
+  flex: none;
+  padding: 6px 14px;
+  border-bottom: 1px solid #252526;
+  font-size: 10px;
+  color: #8b8b8b;
+}
+
+.arg-code-body {
+  flex: 1;
+  min-height: 0;
+  padding: 10px 0;
+  overflow: auto;
+  font-family: "Consolas", "Cascadia Mono", monospace;
+  font-size: 12px;
+  line-height: 1.65;
+  color: #d4d4d4;
+}
+
+.arg-code-line {
+  display: flex;
+  gap: 12px;
+  padding: 0 14px;
+  white-space: pre;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.04);
+  }
+}
+
+.arg-code-ln {
+  flex: none;
+  width: 22px;
+  color: #6e7681;
+  text-align: right;
+  user-select: none;
+}
+
+.arg-code-text {
+  min-width: 0;
+  overflow-wrap: normal;
+}
+
+.arg-code-status {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 16px;
+  padding: 0 12px;
+  height: 22px;
+  background: #007acc;
+  font-size: 10px;
+  color: #fff;
+}
+
+.arg-code-status-right {
+  margin-left: auto;
+}
+
+// 引子终端窗口
+.arg-proterm-window {
+  width: min(760px, calc(100vw - 240px));
+  height: min(460px, 70vh);
+  background: #0c0c0c;
+
+  .arg-app-titlebar {
+    background: #1f1f1f;
+    border-bottom-color: #2b2b2b;
+    color: #d6d6d6;
+  }
+
+  .arg-app-title,
+  .arg-app-subtitle {
+    color: #d6d6d6;
+  }
+
+  .actbtns .uicon img {
+    filter: invert(1);
+  }
+
+  .arg-app-content {
+    background: #0c0c0c;
+  }
+}
+
+.arg-proterm-body {
+  flex: 1;
+  min-height: 0;
+  padding: 12px 14px;
+  overflow-y: auto;
+  background: #0c0c0c;
+  font-family: "Consolas", "Cascadia Mono", monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #ccc;
+}
+
+.arg-proterm-line {
+  margin: 0;
+  font: inherit;
+  white-space: pre-wrap;
+  color: #ccc;
+
+  &[data-tone="dim"] {
+    color: #7d7d7d;
+  }
+
+  &[data-tone="warn"] {
+    color: #e3b341;
+  }
+
+  &[data-tone="cmd"] {
+    color: #ffffff;
+  }
+}
+
+// GitHub 仓库页
+.arg-github-window {
+  width: min(840px, calc(100vw - 220px));
+  height: min(580px, 78vh);
+  background: #0d1117;
+
+  .arg-app-titlebar {
+    background: #161b22;
+    border-bottom-color: #30363d;
+    color: #e6edf3;
+  }
+
+  .arg-app-title,
+  .arg-app-subtitle {
+    color: #e6edf3;
+  }
+
+  .actbtns .uicon img {
+    filter: invert(1);
+  }
+
+  .arg-app-content {
+    background: #0d1117;
+  }
+}
+
+.arg-gh-head {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #30363d;
+  background: #0d1117;
+  font-size: 13px;
+}
+
+.arg-gh-repo {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+
+.arg-gh-owner {
+  color: #58a6ff;
+}
+
+.arg-gh-sep {
+  color: #8b949e;
+}
+
+.arg-gh-name {
+  font-weight: 600;
+  color: #58a6ff;
+}
+
+.arg-gh-badge {
+  margin-left: 4px;
+  padding: 1px 7px;
+  border: 1px solid #30363d;
+  border-radius: 10px;
+  font-size: 10px;
+  color: #8b949e;
+}
+
+.arg-gh-actions {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+  font-size: 10px;
+  color: #c9d1d9;
+}
+
+.arg-gh-star,
+.arg-gh-fork {
+  padding: 3px 10px;
+  border: 1px solid #30363d;
+  border-radius: 5px;
+  background: #21262d;
+}
+
+.arg-gh-tabs {
+  display: flex;
+  flex: none;
+  gap: 18px;
+  padding: 0 16px;
+  border-bottom: 1px solid #30363d;
+  background: #0d1117;
+  font-size: 11px;
+  color: #8b949e;
+
+  span {
+    padding: 9px 0;
+    border-bottom: 2px solid transparent;
+
+    &[data-active="true"] {
+      border-bottom-color: #f78166;
+      color: #e6edf3;
+    }
+
+    b {
+      padding: 1px 5px;
+      border-radius: 8px;
+      background: #30363d;
+      font-size: 9px;
+      color: #c9d1d9;
+    }
+  }
+}
+
+.arg-gh-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  background: #0d1117;
+}
+
+.arg-gh-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  border-bottom: 1px solid #21262d;
+  font-size: 11px;
+  color: #c9d1d9;
+}
+
+.arg-gh-branch {
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: #21262d;
+  font-family: "Consolas", "Cascadia Mono", monospace;
+  font-size: 10px;
+  color: #c9d1d9;
+}
+
+.arg-gh-commit {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  b {
+    font-family: "Consolas", "Cascadia Mono", monospace;
+    font-size: 10px;
+    color: #8b949e;
+    font-weight: 400;
+  }
+}
+
+.arg-gh-file {
+  flex: none;
+  width: 160px;
+  overflow: hidden;
+  color: #58a6ff;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.arg-gh-msg {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: #8b949e;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.arg-gh-time {
+  flex: none;
+  font-size: 10px;
+  color: #6e7681;
+}
+
+.arg-gh-readme {
+  margin: 16px;
+  padding: 16px 18px;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  background: #161b22;
+  font-size: 12px;
+  line-height: 1.9;
+  color: #c9d1d9;
+
+  h3 {
+    margin: 0 0 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #30363d;
+    font-size: 12px;
+    color: #e6edf3;
+  }
+
+  p {
+    margin: 0 0 8px;
+  }
+
+  pre {
+    margin: 10px 0;
+    padding: 9px 12px;
+    border-radius: 5px;
+    background: #0d1117;
+    font-family: "Consolas", "Cascadia Mono", monospace;
+    font-size: 11px;
+    color: #79c0ff;
+  }
+}
+
+.arg-gh-warn {
+  padding: 8px 10px;
+  border-left: 2px solid #d29922;
+  background: rgba(210, 153, 34, 0.1);
+  color: #d29922 !important;
+}
+
+// 此电脑里的文件列表与只读预览
+.arg-pc-filelist {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px;
+  overflow-y: auto;
+}
+
+.arg-pc-file {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: #3d4752;
+  font-family: inherit;
+  font-size: 11.5px;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    border-color: rgba(15, 108, 189, 0.2);
+    background: rgba(15, 108, 189, 0.07);
+  }
+}
+
+.arg-pc-file-icon {
+  flex: none;
+  width: 18px;
+  text-align: center;
+}
+
+.arg-pc-file-name {
+  flex: none;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.arg-pc-file-meta {
+  margin-left: auto;
+  flex: none;
+  font-size: 10px;
+  color: #9aa4b1;
+}
+
+.arg-pc-empty {
+  padding: 40px 0;
+  font-size: 11px;
+  color: #9aa4b1;
+  text-align: center;
+}
+
+.arg-pc-viewer {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.arg-pc-viewer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 14px;
+  border-bottom: 1px solid #eef2f6;
+  background: #fafbfc;
+  font-size: 11.5px;
+  color: #3d4752;
+}
+
+.arg-pc-viewer-back {
+  padding: 3px 12px;
+  border: 1px solid #dfe5ec;
+  border-radius: 4px;
+  background: #fff;
+  color: #3d4752;
+  font-family: inherit;
+  font-size: 10.5px;
+  cursor: pointer;
+
+  &:hover {
+    background: #f3f5f8;
+  }
+}
+
+.arg-pc-viewer-body {
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  padding: 14px 16px;
+  overflow: auto;
+  background: #fff;
+  font-family: "Consolas", "Cascadia Mono", monospace;
+  font-size: 11.5px;
+  line-height: 1.85;
+  color: #3d4752;
+  white-space: pre-wrap;
+}
+
+// 远程桌面连接
+// Windows 安全凭据对话框
+.arg-sec-dialog {
+  display: flex;
+  flex-direction: column;
+  background: #f0f0f0;
+  color: #1f2328;
+  font-size: 12px;
+}
+
+.arg-sec-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 18px 14px;
+  background: #ffffff;
+  border-bottom: 1px solid #dcdcdc;
+}
+
+.arg-sec-shield {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  color: #0f6cbd;
+}
+
+.arg-sec-titles {
+  min-width: 0;
+}
+
+.arg-sec-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2328;
+}
+
+.arg-sec-sub {
+  margin-top: 3px;
+  font-size: 11.5px;
+  color: #5c6670;
+}
+
+.arg-sec-body {
+  padding: 14px 18px 16px;
+}
+
+.arg-sec-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.arg-sec-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 11.5px;
+}
+
+.arg-sec-label {
+  flex: none;
+  width: 48px;
+  color: #5c6670;
+}
+
+.arg-sec-value {
+  min-width: 0;
+  overflow: hidden;
+  color: #1f2328;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.arg-sec-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 5px 8px;
+  border: 1px solid #b5b5b5;
+  border-radius: 2px;
+  background: #fff;
+  font-family: inherit;
+  font-size: 12px;
+  color: #1f2328;
+  outline: none;
+
+  &:focus {
+    border-color: #0f6cbd;
+    box-shadow: 0 0 0 1px rgba(15, 108, 189, 0.35);
+  }
+}
+
+.arg-sec-note {
+  margin-top: 12px;
+  font-size: 11px;
+  line-height: 1.6;
+  color: #5c6670;
+  min-height: 18px;
+}
+
+.arg-sec-error {
+  color: #b42318;
+}
+
+.arg-sec-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 18px;
+  border-top: 1px solid #dcdcdc;
+  background: #f0f0f0;
+}
+
+.arg-sec-ok,
+.arg-sec-cancel {
+  min-width: 76px;
+  padding: 5px 14px;
+  border-radius: 2px;
+  font-family: inherit;
+  font-size: 11.5px;
+  cursor: pointer;
+}
+
+.arg-sec-ok {
+  border: 1px solid #0f6cbd;
+  background: #0f6cbd;
+  color: #fff;
+
+  &:hover {
+    background: #115ea3;
+  }
+}
+
+.arg-sec-cancel {
+  border: 1px solid #b5b5b5;
+  background: #fdfdfd;
+  color: #1f2328;
+
+  &:hover {
+    background: #e9e9e9;
+  }
+}
+
+.arg-rdp-window {
+  width: min(480px, calc(100vw - 60px));
+  height: auto;
+  min-height: 340px;
+}
+
+.arg-rdp-body {
+  display: flex;
+  flex-direction: column;
+  padding: 20px 24px 0;
+  background: #fff;
+}
+
+.arg-rdp-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #eef2f6;
+
+  img {
+    width: 26px;
+    height: 26px;
+    margin-top: 2px;
+    object-fit: contain;
+    opacity: 0.85;
+  }
+}
+
+.arg-rdp-banner-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1f2328;
+}
+
+.arg-rdp-banner-sub {
+  margin-top: 4px;
+  font-size: 11px;
+  color: #7a8694;
+}
+
+.arg-rdp-label {
+  margin: 16px 0 6px;
+  font-size: 11px;
+  color: #3d4752;
+}
+
+.arg-rdp-field input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 7px 10px;
+  border: 1px solid #dfe5ec;
+  border-radius: 4px;
+  background: #fff;
+  font-family: inherit;
+  font-size: 12px;
+  color: #1f2328;
+  outline: none;
+
+  &:focus {
+    border-color: #0f6cbd;
+  }
+}
+
+.arg-rdp-hint {
+  margin-top: 8px;
+  font-size: 10px;
+  line-height: 1.7;
+  color: #8b96a3;
+}
+
+// 登录阶段的用户信息块
+.arg-rdp-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0 4px;
+  padding: 12px;
+  border: 1px solid #eef2f6;
+  border-radius: 6px;
+  background: #fafbfc;
+}
+
+.arg-rdp-avatar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #e3e7ec;
+
+  img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    opacity: 0.65;
+  }
+}
+
+.arg-rdp-user-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1f2328;
+}
+
+.arg-rdp-user-host {
+  margin-top: 3px;
+  font-family: "Consolas", "Cascadia Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  color: #8b96a3;
+}
+
+.arg-rdp-error {
+  margin-top: 8px;
+  font-size: 11px;
+  line-height: 1.7;
+  color: #b42318;
+}
+
+.arg-rdp-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin: 20px -24px 0;
+  padding: 12px 24px;
+  border-top: 1px solid #eef2f6;
+  background: #fafbfc;
+}
+
+.arg-rdp-connect,
+.arg-rdp-cancel {
+  padding: 6px 20px;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 11.5px;
+  cursor: pointer;
+}
+
+.arg-rdp-connect {
+  border: 1px solid #0f6cbd;
+  background: #0f6cbd;
+  color: #fff;
+
+  &:hover {
+    background: #115ea3;
+  }
+}
+
+.arg-rdp-cancel {
+  border: 1px solid #dfe5ec;
+  background: #fff;
+  color: #3d4752;
+
+  &:hover {
+    background: #f3f5f8;
+  }
+}
+
+.arg-rdp-footer {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 -24px;
+  padding: 8px 24px 10px;
+  border-top: 1px solid #eef2f6;
+  font-family: "Consolas", "Cascadia Mono", monospace;
+  font-size: 9.5px;
+  letter-spacing: 1px;
+  color: #9aa4b1;
+}
+
+@media (max-width: 900px) {
+  .arg-mail-main {
+    grid-template-columns: 240px minmax(0, 1fr);
+  }
+
+  .arg-mail-side {
+    display: none;
+  }
+}
+
+@media (max-width: 700px) {
+  .arg-prologue-icons {
+    display: none;
+  }
+
+  .arg-mail-window {
+    width: 92vw;
+  }
+}
+
+@media (max-width: 640px) {
+  .arg-mail-window {
+    height: 86vh;
+  }
+
+  .arg-mail-main {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .arg-mail-list {
+    display: none;
+  }
+
+  .arg-prologue-icons {
+    top: 14px;
+    left: 12px;
+    gap: 8px;
+  }
+
+  .arg-desk-icon {
+    width: 68px;
+  }
+}

@@ -1,0 +1,68 @@
+// 剧情 block 的通用样式。
+// 通过 CSS 变量适配浅色（引子）与深色（文件管理器/浏览器）两种容器。
+
+.arg-blocks {
+  font-size: 14px;
+  line-height: 1.85;
+  color: var(--arg-fg, inherit);
+
+  .arg-block-p {
+    margin: 0 0 12px;
+    white-space: pre-wrap;
+  }
+
+  .arg-block-h {
+    margin: 22px 0 10px;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: var(--arg-fg-strong, inherit);
+
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+
+  .arg-block-code {
+    margin: 14px 0;
+    padding: 12px 14px;
+    overflow-x: auto;
+    border-radius: 6px;
+    background: var(--arg-code-bg, rgba(0, 0, 0, 0.06));
+    color: var(--arg-code-fg, inherit);
+    font-family: "Consolas", "Cascadia Mono", monospace;
+    font-size: 12px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .arg-block-quote {
+    margin: 14px 0;
+    padding: 2px 0 2px 14px;
+    border-left: 2px solid var(--arg-accent, #4cc2ff);
+    color: var(--arg-muted, inherit);
+    font-style: normal;
+  }
+
+  .arg-block-hint {
+    margin: 16px 0;
+    padding: 10px 12px;
+    border-left: 2px solid #e3b341;
+    background: var(--arg-hint-bg, rgba(227, 179, 65, 0.1));
+    color: var(--arg-hint-fg, inherit);
+    font-size: 13px;
+  }
+
+  // 页面/文件的元信息：最后写入时间、大小之类。安静地放在正文下面。
+  .arg-block-meta {
+    margin-top: 20px;
+    padding-top: 10px;
+    border-top: 1px solid var(--arg-meta-border, rgba(127, 127, 127, 0.22));
+    color: var(--arg-muted, inherit);
+    font-family: "Consolas", "Cascadia Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    opacity: 0.7;
+  }
+}

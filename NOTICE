@@ -1,0 +1,53 @@
+未授权访问 / ACCESS DENIED
+==========================
+
+本目录是一个基于 win11React 的二次改造作品。
+
+一、原始作品
+------------
+
+名称：win11React
+作者：blueedgetechno 及贡献者
+仓库：https://github.com/blueedgetechno/win11React
+许可：CC0 1.0 Universal（见 LICENSE）
+
+原始项目的全部源代码、样式、图标与资源，
+其版权与许可声明均按原样保留，未作删改。
+
+二、二次改造部分
+----------------
+
+名称：未授权访问 / ACCESS DENIED
+性质：互动叙事（ARG）二次改造
+改造范围：
+
+  - src/data/arg/               剧情数据层（新增）
+  - src/components/arg/         引子、结局、通知、剧情渲染器（新增）
+  - src/containers/background/  锁屏与启动屏重写
+  - src/containers/applications/apps/
+                                记事本、文件管理器、浏览器、
+                                终端、回收站、不要运行 重写
+  - src/reducers/arg.js         进度状态（新增）
+  - src/utils/arg.js            进度读写、锁屏校验、虚构时钟（新增）
+  - 桌面、任务栏、开始菜单的应用清单裁剪
+
+剧情、人物、组织、日期与事件均为虚构。
+「林澈 / linche」「维护组」「linche-agent」等名称不对应任何真实
+个人、组织或开源项目。
+
+三、许可
+--------
+
+二次改造部分同样以 CC0 1.0 Universal 发布。
+你可以在 CC0 1.0 的条款下自由使用、修改与分发本作品，
+无需署名，也无需保留本文件。
+
+四、商标与关联声明
+------------------
+
+本项目与 Microsoft Corporation 无任何关联，
+不是 Microsoft 的产品，也不代表其立场。
+Windows 及相关名称是其各自所有者的商标。
+
+本项目与原 win11React 项目的维护者无隶属关系，
+仅作为其 CC0 作品的衍生使用。

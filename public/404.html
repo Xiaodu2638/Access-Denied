@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>404 - 页面不存在</title>
+    <!--
+      GitHub Pages 会把任意深度的缺失路径都交给这个文件，
+      而浏览器地址栏仍然是那条缺失的深层路径。
+      所以这里不能用 ./404.css 这类相对路径，全部内联。
+    -->
+    <style>
+      body {
+        font-family: "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+        background: #05070a;
+        color: #fefeff;
+        height: 100vh;
+        margin: 0;
+      }
+
+      #page {
+        display: table;
+        height: 100%;
+        margin: -10px auto 0;
+        width: 70%;
+        font-size: 1.9vw;
+      }
+
+      #container {
+        display: table-cell;
+        vertical-align: middle;
+      }
+
+      h1,
+      h2,
+      h4,
+      h5 {
+        font-weight: 300;
+        padding: 0;
+        margin: 25px 0 0;
+      }
+
+      h1 {
+        font-size: 6rem;
+        margin-bottom: 10px;
+      }
+
+      h2 {
+        font-size: 21px;
+        line-height: 1.6;
+      }
+
+      h4 {
+        font-size: 18px;
+        line-height: 1.5em;
+      }
+
+      h5 {
+        line-height: 22px;
+        font-size: 14px;
+        font-weight: 400;
+        color: #8b949e;
+      }
+
+      #details {
+        display: flex;
+        flex-flow: row nowrap;
+        padding-top: 10px;
+      }
+
+      #stopcode {
+        padding-left: 10px;
+        flex: 1 1 auto;
+      }
+
+      @media (min-width: 840px) {
+        #page {
+          font-size: 140%;
+          width: 800px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="page">
+      <div id="container">
+        <h1>:(</h1>
+        <h2>
+          你的会话遇到了问题，需要重新开始。我们正在收集一些信息，然后会为你重启。
+        </h2>
+        <h2><span id="percentage">0</span>% 已完成</h2>
+        <div id="details">
+          <div id="stopcode">
+            <h4>如需了解更多信息，请返回会话入口。</h4>
+            <h5>
+              如果你要联系支持人员，请提供以下信息：<br />
+              停止代码：404_SESSION_NOT_FOUND
+            </h5>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      var percentageElement = document.getElementById("percentage");
+      var percentage = 0;
+
+      function tick() {
+        percentage += parseInt(Math.random() * 10);
+        if (percentage > 100) percentage = 100;
+        percentageElement.innerText = percentage;
+        if (percentage < 100) {
+          setTimeout(tick, Math.random() * 500 + 500);
+        }
+      }
+
+      tick();
+    </script>
+  </body>
+</html>

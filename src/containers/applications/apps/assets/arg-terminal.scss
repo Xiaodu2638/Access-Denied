@@ -1,0 +1,92 @@
+// 终端：深色控制台。
+// 与文件管理器、浏览器共用 ARG 的深色配色，但保持命令行自己的等宽排版。
+
+.arg-terminal {
+  --arg-term-bg: #060606;
+  --arg-term-fg: #d6d6d6;
+  --arg-term-dim: #7d7d7d;
+  --arg-term-accent: #4cc2ff;
+  --arg-term-warn: #e3b341;
+  --arg-term-err: #ff7b72;
+  --arg-term-ok: #7ee787;
+  --arg-term-ghost: #a371f7;
+
+  background: var(--arg-term-bg);
+  color: var(--arg-term-fg);
+
+  .windowScreen {
+    background: var(--arg-term-bg);
+  }
+}
+
+.arg-term-body {
+  height: 100%;
+  box-sizing: border-box;
+  padding: 10px 14px 16px;
+  overflow-y: auto;
+  background: var(--arg-term-bg);
+  font-family: "Consolas", "Cascadia Mono", monospace;
+  font-size: 12px;
+  line-height: 1.55;
+  cursor: text;
+}
+
+.arg-term-line {
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--arg-term-fg);
+  font: inherit;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.arg-term-cmd {
+  margin-top: 10px;
+  color: var(--arg-term-fg);
+}
+
+.arg-term-dim {
+  color: var(--arg-term-dim);
+}
+
+.arg-term-warn {
+  color: var(--arg-term-warn);
+}
+
+.arg-term-err {
+  color: var(--arg-term-err);
+}
+
+.arg-term-ok {
+  color: var(--arg-term-ok);
+}
+
+.arg-term-prompt {
+  display: flex;
+  align-items: baseline;
+  margin: 0;
+  font: inherit;
+}
+
+.arg-term-cwd {
+  flex: none;
+  color: var(--arg-term-dim);
+  white-space: pre;
+}
+
+.arg-term-input {
+  flex: 1;
+  min-width: 0;
+  margin-left: 2px;
+  padding: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--arg-term-fg);
+  font: inherit;
+  caret-color: var(--arg-term-accent);
+}
+
+.arg-term-body::-webkit-scrollbar {
+  width: 10px;
+}

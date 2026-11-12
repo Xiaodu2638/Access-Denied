@@ -1,0 +1,77 @@
+// ARG 窗口的统一外观。
+// 六个应用共用这里的一套深色标题栏与内容底色，
+// 各应用自己的 scss 只负责内容区排版，不再重复覆盖 .toolbar。
+//
+// 目标：所有窗口的标题栏高度、底色、标题字号、按钮图标反色都一致，
+// 只让内容区保留各自的气质（终端全黑、记事本浅色纸张、浏览器深灰）。
+
+$arg-win-titlebar: #2b2b2b;
+$arg-win-titlebar-line: #3a3a3a;
+$arg-win-fg: #e6e6e6;
+$arg-win-muted: #9a9a9a;
+
+// 统一标题栏
+.arg-win {
+  .toolbar {
+    flex: none;
+    height: 32px;
+    box-sizing: border-box;
+    background: $arg-win-titlebar;
+    border-bottom: 1px solid $arg-win-titlebar-line;
+    border-radius: 6px 6px 0 0;
+    color: $arg-win-fg;
+  }
+
+  // 深色主题下 general.scss 会把标题写成白色，这里统一收敛。
+  .toolbar .appFullName,
+  .toolbar[data-noinvert="false"] .appFullName,
+  .toolbar .appFullName[data-white="true"] {
+    color: $arg-win-fg;
+    font-size: 11.5px;
+    letter-spacing: 0.5px;
+  }
+
+  // 深色标题栏上把控制按钮图标反成浅色。
+  .actbtns .uicon img {
+    filter: invert(1);
+  }
+
+  .actbtns .uicon {
+    padding: 0 14px;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+  }
+}
+
+// 窗口内部的自绘工具条（面包屑、标签页、状态栏等）统一高度与分隔线。
+.arg-win-bar {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 12px;
+  box-sizing: border-box;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  background: #262628;
+  font-size: 11px;
+  color: $arg-win-muted;
+}
+
+// 窗口底部状态栏
+.arg-win-status {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 16px;
+  min-height: 28px;
+  padding: 0 14px;
+  box-sizing: border-box;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  background: #262628;
+  font-family: "Consolas", "Cascadia Mono", monospace;
+  font-size: 10px;
+  color: $arg-win-muted;
+}

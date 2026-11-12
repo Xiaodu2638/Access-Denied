@@ -1,0 +1,631 @@
+// 回收站与「不要运行」共用样式。
+
+// 窗口内部的自绘工具条：固定高度、不参与压缩。
+.arg-app-toolbar {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 32px;
+  padding: 0 14px;
+  box-sizing: border-box;
+  border-bottom: 1px solid var(--comp-txt);
+  background: #262628;
+  font-size: 11px;
+  color: var(--txt-col);
+}
+
+.arg-app-count {
+  flex: none;
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--sat-txt);
+}
+
+// 窗口内容区：占满剩余空间、自带底色，避免透出桌面。
+.arg-app-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  padding: 16px;
+  overflow-y: auto;
+  background: #202020;
+}
+
+.arg-app-note {
+  margin-top: 12px;
+  font-size: 11px;
+  line-height: 1.7;
+  color: var(--sat-txt);
+}
+
+// 回收站
+.arg-bin-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px;
+  border: 1px solid var(--comp-txt);
+  border-radius: 6px;
+  background: var(--bg1, rgba(0, 0, 0, 0.03));
+}
+
+.arg-bin-thumb {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, #243447, #0e1622);
+  color: #4cc2ff;
+  font-size: 15px;
+}
+
+.arg-bin-info {
+  min-width: 0;
+}
+
+.arg-bin-name {
+  overflow: hidden;
+  font-size: 13px;
+  color: var(--txt-col);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.arg-bin-meta {
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--sat-txt);
+}
+
+.arg-bin-state {
+  flex: none;
+  margin-left: auto;
+  padding: 2px 9px;
+  border-radius: 10px;
+  font-size: 10px;
+  letter-spacing: 1px;
+
+  &[data-restored="true"] {
+    background: rgba(126, 231, 135, 0.12);
+    color: #7ee787;
+  }
+
+  &[data-restored="false"] {
+    background: rgba(255, 123, 114, 0.12);
+    color: #ff7b72;
+  }
+}
+
+// 不要运行：内容区按代码编辑器排版，与回收站的文件列表区分开。
+.arg-dontrun {
+  --bg1: #202020;
+  --comp-txt: #333;
+  --txt-col: #e6e6e6;
+  --sat-txt: #9a9a9a;
+
+  background: #202020;
+  color: var(--txt-col);
+
+  .windowScreen {
+    background: #202020;
+  }
+}
+
+// 不要运行
+// 工具栏右侧的状态标签：只给事实，不是句子。
+.arg-app-tags {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 10px;
+}
+
+.arg-app-tag {
+  padding: 1px 7px;
+  border-radius: 3px;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+
+  &[data-tone="warn"] {
+    background: rgba(227, 179, 65, 0.12);
+    color: #e3b341;
+  }
+}
+
+.arg-dontrun-code {
+  flex: 1;
+  min-height: 0;
+  margin: 12px 0 0;
+  padding: 14px;
+  overflow: auto;
+  border: 1px solid #1f2a36;
+  border-radius: 6px;
+  background: #0b1118;
+  color: #c9d1d9;
+  font-family: "Consolas", "Cascadia Mono", monospace;
+  font-size: 12px;
+  line-height: 1.75;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.arg-dontrun-actions {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+
+  .arg-app-note {
+    margin-top: 0;
+  }
+}
+
+// 运行按钮做成编辑器标题栏那种小三角，不用红底、不强调危险。
+.arg-dontrun-run {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 26px;
+  height: 22px;
+  border: 1px solid var(--comp-txt);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--txt-col);
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: var(--hover-bg, rgba(136, 136, 136, 0.2));
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+}
+
+.arg-btn-danger,
+.arg-btn-ghost {
+  flex: none;
+  padding: 7px 16px;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+}
+
+.arg-btn-danger {
+  border: 1px solid #b42318;
+  background: rgba(180, 35, 24, 0.14);
+  color: #ff7b72;
+
+  &:hover {
+    background: rgba(180, 35, 24, 0.26);
+  }
+}
+
+.arg-btn-ghost {
+  border: 1px solid var(--comp-txt);
+  background: transparent;
+  color: var(--txt-col);
+
+  &:hover {
+    background: var(--bg1, rgba(255, 255, 255, 0.05));
+  }
+}
+
+.arg-dontrun-output {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border: 1px solid #1f2a36;
+  border-radius: 6px;
+  background: #0b1118;
+  font-family: "Consolas", "Cascadia Mono", monospace;
+  font-size: 11px;
+  line-height: 1.9;
+}
+
+.arg-dontrun-output-title {
+  margin-bottom: 8px;
+  color: #4cc2ff;
+  font-size: 10px;
+  letter-spacing: 2px;
+}
+
+.arg-dontrun-line {
+  color: #8b949e;
+
+  &[data-tone="warn"] {
+    color: #e3b341;
+  }
+
+  &[data-tone="ok"] {
+    color: #7ee787;
+  }
+}
+
+// 回收站播放器
+// 标题栏由 arg-window.scss 统一处理，这里只管内容区。
+.arg-recycle {
+  --bg1: #202020;
+  --comp-txt: #333;
+  --txt-col: #e6e6e6;
+  --sat-txt: #9a9a9a;
+
+  background: var(--fakeMica);
+  color: var(--txt-col);
+
+  .windowScreen {
+    background: #202020;
+  }
+
+  .arg-app-toolbar {
+    border-bottom-color: #333;
+    background: #272727;
+  }
+
+  .arg-bin-row {
+    border-color: #333;
+    background: #262626;
+  }
+
+  .arg-app-note {
+    color: var(--sat-txt);
+  }
+}
+
+.arg-bin-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@keyframes arg-rec-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+
+@keyframes arg-sub-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.arg-player {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  padding: 12px;
+  border: 1px solid var(--comp-txt);
+  border-radius: 6px;
+  background: var(--bg1, rgba(0, 0, 0, 0.03));
+}
+
+.arg-player-screen {
+  position: relative;
+  flex: 1;
+  min-height: 200px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #05070a;
+}
+
+.arg-player-video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #05070a;
+}
+
+.arg-player-fallback {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 220px;
+  padding: 24px;
+  box-sizing: border-box;
+  background:
+    radial-gradient(circle at 50% 40%, rgba(76, 194, 255, 0.08), transparent 60%),
+    #05070a;
+  color: #c9d1d9;
+  text-align: center;
+}
+
+.arg-player-rec {
+  position: absolute;
+  top: 12px;
+  left: 14px;
+  font-family: "Consolas", "Cascadia Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: #ff7b72;
+  animation: arg-rec-blink 1.4s step-end infinite;
+}
+
+.arg-player-tc {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  font-family: "Consolas", "Cascadia Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: #6e7b8a;
+}
+
+.arg-player-sub {
+  max-width: 460px;
+  font-size: 13px;
+  line-height: 1.9;
+  color: #c9d1d9;
+  animation: arg-sub-in 260ms ease-out both;
+}
+
+.arg-player-idle {
+  font-family: "Consolas", "Cascadia Mono", monospace;
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: #6e7b8a;
+}
+
+.arg-player-controls {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 4px 2px;
+}
+
+.arg-player-play {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--comp-txt);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--txt-col);
+  font-family: inherit;
+  font-size: 11px;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--hover-bg, rgba(136, 136, 136, 0.2));
+  }
+}
+
+.arg-player-track {
+  position: relative;
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--comp-txt);
+  cursor: pointer;
+}
+
+.arg-player-progress {
+  height: 100%;
+  border-radius: 2px;
+  background: #4cc2ff;
+}
+
+.arg-player-time {
+  flex: none;
+  font-family: "Consolas", "Cascadia Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--sat-txt);
+}
+
+.arg-player-note {
+  flex: none;
+  padding-top: 8px;
+  font-size: 10px;
+  color: var(--sat-txt);
+}
+
+// 记事本 / 林澈的日记
+// 桌面与其它窗口都是深色，这里也按深色记事本渲染，
+// 只用略微偏冷的纸张色区分"文档"和"应用界面"。
+// 标题栏由 arg-window.scss 统一处理。
+.arg-diary {
+  --txt-col: #dcdcdc;
+  --sat-txt: #8b949e;
+  --comp-txt: #333;
+  --dark-txt: #dcdcdc;
+  --bg1: #1e1e20;
+  --fakeMica: #1e1e20;
+
+  background: #1e1e20;
+  color: #dcdcdc;
+
+  .actbtns .uicon img {
+    filter: invert(1);
+  }
+}
+
+.arg-diary-tabbar {
+  display: flex;
+  flex: none;
+  align-items: flex-end;
+  gap: 4px;
+  padding: 6px 8px 0;
+  border-bottom: 1px solid var(--comp-txt);
+  background: #232325;
+}
+
+.arg-diary-tab {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 10px;
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-radius: 5px 5px 0 0;
+  font-size: 11px;
+  color: var(--sat-txt);
+  cursor: default;
+
+  &[data-active="true"] {
+    border-color: var(--comp-txt);
+    background: #1e1e20;
+    color: var(--txt-col);
+  }
+
+  img {
+    width: 13px;
+    height: 13px;
+    object-fit: contain;
+  }
+}
+
+.arg-diary-tab-close {
+  margin-left: 4px;
+  font-size: 12px;
+  opacity: 0.5;
+}
+
+.arg-diary-tab-add {
+  padding: 2px 9px 6px;
+  font-size: 14px;
+  color: var(--sat-txt);
+  cursor: default;
+}
+
+.arg-diary-menubar {
+  display: flex;
+  flex: none;
+  gap: 18px;
+  padding: 5px 14px;
+  border-bottom: 1px solid var(--comp-txt);
+  background: #232325;
+  font-size: 11px;
+  color: var(--txt-col);
+}
+
+.arg-diary-body {
+  flex: 1;
+  min-height: 0;
+  padding: 22px 28px 30px;
+  overflow-y: auto;
+  background: #1e1e20;
+}
+
+.arg-diary-doc {
+  max-width: 660px;
+  margin: 0 auto;
+}
+
+.arg-diary-head {
+  padding-bottom: 16px;
+  border-bottom: 1px solid #2c2c2e;
+
+  h1 {
+    margin: 0;
+    font-family: "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--txt-col);
+  }
+}
+
+.arg-diary-byline {
+  margin-top: 6px;
+  font-family: "Consolas", "Cascadia Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  color: var(--sat-txt);
+}
+
+.arg-diary-entry {
+  padding-top: 22px;
+}
+
+.arg-diary-date {
+  font-family: "Consolas", "Cascadia Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--sat-txt);
+}
+
+.arg-diary-title {
+  margin: 6px 0 12px;
+  font-family: "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--txt-col);
+}
+
+.arg-diary .arg-blocks {
+  font-family: "Consolas", "Cascadia Mono", monospace;
+  font-size: 12px;
+  line-height: 1.95;
+  color: var(--txt-col);
+}
+
+.arg-diary .arg-block-p {
+  margin: 0 0 12px;
+}
+
+.arg-diary .arg-block-code {
+  margin: 0 0 12px;
+  padding: 9px 12px;
+  border-left: 2px solid var(--comp-txt);
+  background: #17171a;
+  font-size: 11px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+}
+
+.arg-diary .arg-block-quote {
+  margin: 0 0 12px;
+  padding-left: 12px;
+  border-left: 2px solid var(--comp-txt);
+  color: var(--sat-txt);
+}
+
+.arg-diary-empty {
+  padding: 60px 0;
+  font-family: "Consolas", "Cascadia Mono", monospace;
+  font-size: 12px;
+  color: var(--sat-txt);
+  text-align: center;
+}
+
+.arg-diary-status {
+  display: flex;
+  flex: none;
+  gap: 22px;
+  padding: 5px 14px;
+  border-top: 1px solid var(--comp-txt);
+  background: #232325;
+  font-family: "Consolas", "Cascadia Mono", monospace;
+  font-size: 10px;
+  color: var(--sat-txt);
+
+  span:last-child {
+    margin-left: auto;
+  }
+}
