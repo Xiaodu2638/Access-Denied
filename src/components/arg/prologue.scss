@@ -444,6 +444,7 @@
   right: 0;
   bottom: 0;
   left: 0;
+  z-index: 1000;
   display: flex;
   align-items: center;
   height: 48px;
@@ -454,8 +455,16 @@
   backdrop-filter: blur(18px);
 }
 
-.arg-taskbar-left {
+// 三段式：左右两侧等宽占位，中间内容真正居中。
+.arg-taskbar-spacer {
   flex: 1;
+}
+
+.arg-taskbar-center {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: none;
 }
 
 .arg-taskbar-start {
@@ -1400,11 +1409,13 @@
 }
 
 // 开始菜单
+// 挂在根节点、与任务栏同级，所以要自己让开任务栏高度（48px + 8px 间距）。
+// z-index 必须高于任务栏（1000）和所有窗口（10 起递增），否则会被压住。
 .arg-start-menu {
   position: absolute;
-  bottom: 8px;
+  bottom: 56px;
   left: 50%;
-  z-index: 2;
+  z-index: 2000;
   display: flex;
   flex-direction: column;
   width: min(560px, calc(100vw - 40px));

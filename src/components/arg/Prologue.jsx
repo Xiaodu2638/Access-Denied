@@ -859,71 +859,79 @@ const Prologue = () => {
           </div>
         ) : null}
 
-        {startOpen ? (
-          <div className="arg-start-menu" onClick={(e) => e.stopPropagation()}>
-            <input
-              className="arg-start-search"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="搜索应用、设置和文档"
-              aria-label="搜索应用"
-            />
-            <div className="arg-start-grid">
-              {menuIcons
-                .filter((icon) => icon.label.includes(search.trim()))
-                .map((icon) => (
-                  <button
-                    key={icon.id}
-                    type="button"
-                    className="arg-start-app"
-                    onClick={() => {
-                      open(icon.id);
-                      setSearch("");
-                    }}
-                  >
-                    <img src={`img/icon/${icon.icon}.png`} alt="" />
-                    <span>{icon.label}</span>
-                  </button>
-                ))}
-            </div>
-
-            {!search.trim() && recentApps.length ? (
-              <div className="arg-start-recent">
-                <div className="arg-start-recent-title">最近使用</div>
-                <div className="arg-start-recent-list">
-                  {recentApps
-                    .map((id) =>
-                      prologue.desktopIcons.find((icon) => icon.id === id),
-                    )
-                    .filter(Boolean)
-                    .map((icon) => (
-                      <button
-                        key={icon.id}
-                        type="button"
-                        className="arg-start-recent-item"
-                        onClick={() => {
-                          open(icon.id);
-                          setSearch("");
-                        }}
-                      >
-                        <img src={`img/icon/${icon.icon}.png`} alt="" />
-                        <span>{icon.label}</span>
-                      </button>
-                    ))}
-                </div>
-              </div>
-            ) : null}
-
-            <div className="arg-start-footer">
-              <span className="arg-start-user">{prologue.host.account}</span>
-              <span className="arg-start-power">⏻</span>
-            </div>
-          </div>
-        ) : null}
       </div>
 
+      {/* 开始菜单必须放在桌面容器外面：
+          桌面容器有 overflow 裁剪，且在任务栏之下，菜单会被压住。
+          放在根节点、与任务栏同级，才能盖住所有窗口。 */}
+      {startOpen ? (
+        <div className="arg-start-menu" onClick={(e) => e.stopPropagation()}>
+          <input
+            className="arg-start-search"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="搜索应用、设置和文档"
+            aria-label="搜索应用"
+          />
+          <div className="arg-start-grid">
+            {menuIcons
+              .filter((icon) => icon.label.includes(search.trim()))
+              .map((icon) => (
+                <button
+                  key={icon.id}
+                  type="button"
+                  className="arg-start-app"
+                  onClick={() => {
+                    open(icon.id);
+                    setSearch("");
+                  }}
+                >
+                  <img src={`img/icon/${icon.icon}.png`} alt="" />
+                  <span>{icon.label}</span>
+                </button>
+              ))}
+          </div>
+
+          {!search.trim() && recentApps.length ? (
+            <div className="arg-start-recent">
+              <div className="arg-start-recent-title">最近使用</div>
+              <div className="arg-start-recent-list">
+                {recentApps
+                  .map((id) =>
+                    prologue.desktopIcons.find((icon) => icon.id === id),
+                  )
+                  .filter(Boolean)
+                  .map((icon) => (
+                    <button
+                      key={icon.id}
+                      type="button"
+                      className="arg-start-recent-item"
+                      onClick={() => {
+                        open(icon.id);
+                        setSearch("");
+                      }}
+                    >
+                      <img src={`img/icon/${icon.icon}.png`} alt="" />
+                      <span>{icon.label}</span>
+                    </button>
+                  ))}
+              </div>
+            </div>
+          ) : null}
+
+          <div className="arg-start-footer">
+            <span className="arg-start-user">{prologue.host.account}</span>
+            <span className="arg-start-power">⏻</span>
+          </div>
+        </div>
+      ) : null}
+
       <div className="arg-prologue-taskbar">
-        <div className="arg-taskbar-left">
+        {/* 三段式：左占位 / 中间居中 / 右时钟。
+            左右两侧等宽（flex: 1），中间内容才是真正的视觉中心。 */}
+        <div className="arg-taskbar-spacer"></div>
+
+        <div className="arg-taskbar-center">
           <button
             type="button"
             className="arg-taskbar-start"
@@ -937,28 +945,28 @@ const Prologue = () => {
           >
             <img src="img/icon/home.png" alt="" />
           </button>
-        </div>
 
-        <div className="arg-taskbar-apps">
-          {taskbarApps.map((icon) => {
-            const isOpen = openWindows.some((item) => item.id === icon.id);
-            const isActive = topWindow && topWindow.id === icon.id;
-            return (
-              <button
-                key={icon.id}
-                type="button"
-                className="arg-taskbar-app"
-                data-active={isActive ? "true" : "false"}
-                data-running={isOpen ? "true" : "false"}
-                aria-label={icon.label}
-                title={icon.label}
-                onClick={() => toggleFromTaskbar(icon.id)}
-              >
-                <img src={`img/icon/${icon.icon}.png`} alt="" />
-                <span className="arg-taskbar-dot"></span>
-              </button>
-            );
-          })}
+          <div className="arg-taskbar-apps">
+            {taskbarApps.map((icon) => {
+              const isOpen = openWindows.some((item) => item.id === icon.id);
+              const isActive = topWindow && topWindow.id === icon.id;
+              return (
+                <button
+                  key={icon.id}
+                  type="button"
+                  className="arg-taskbar-app"
+                  data-active={isActive ? "true" : "false"}
+                  data-running={isOpen ? "true" : "false"}
+                  aria-label={icon.label}
+                  title={icon.label}
+                  onClick={() => toggleFromTaskbar(icon.id)}
+                >
+                  <img src={`img/icon/${icon.icon}.png`} alt="" />
+                  <span className="arg-taskbar-dot"></span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         <div className="arg-taskbar-clock">
