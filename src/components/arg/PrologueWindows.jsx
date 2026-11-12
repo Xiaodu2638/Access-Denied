@@ -11,8 +11,6 @@ export const PrologueWindow = ({
   icon,
   onClose,
   onMinimize,
-  onMaximize,
-  maximized,
   className = "",
   children,
 }) => {
@@ -21,7 +19,6 @@ export const PrologueWindow = ({
   return (
     <div
       className={"arg-app-window " + className}
-      data-maximized={maximized ? "true" : "false"}
     >
       <div className="arg-app-titlebar">
         <img className="arg-app-icon" src={`img/icon/${icon}.png`} alt="" />
@@ -38,26 +35,6 @@ export const PrologueWindow = ({
           >
             <svg viewBox="0 0 10 10" width="10" height="10" aria-hidden="true">
               <path d="M1 5h8" stroke="currentColor" strokeWidth="1.1" />
-            </svg>
-          </button>
-
-          <button
-            type="button"
-            className="arg-app-ctl"
-            aria-label={maximized ? "向下还原" : "最大化"}
-            title={maximized ? "向下还原" : "最大化"}
-            onClick={onMaximize}
-          >
-            <svg viewBox="0 0 10 10" width="10" height="10" aria-hidden="true">
-              <rect
-                x="1.5"
-                y="1.5"
-                width="7"
-                height="7"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.1"
-              />
             </svg>
           </button>
 
@@ -92,7 +69,7 @@ const pcSidebar = [
 
 // 引子里的「此电脑」：左侧导航 + 右侧文件列表 + 底部状态。
 // 「文档」里放着 linche.cred —— 玩家要去这里找到它，才能拿到恢复密钥。
-export const PcWindow = ({ onClose, onMinimize, onMaximize, maximized }) => {
+export const PcWindow = ({ onClose, onMinimize }) => {
   const [active, setActive] = useState("文档");
   const [opened, setOpened] = useState(null);
 
@@ -106,10 +83,7 @@ export const PcWindow = ({ onClose, onMinimize, onMaximize, maximized }) => {
       subtitle="YOU-PC"
       icon="explorer"
       onClose={onClose}
-      onMinimize={onMinimize}
-      onMaximize={onMaximize}
-      maximized={maximized}
-      className="arg-pc-window"
+      onMinimize={onMinimize}      className="arg-pc-window"
     >
       <div className="arg-pc-main">
         <aside className="arg-pc-side">
@@ -255,10 +229,7 @@ const bookmarks = [
 
 export const BrowserWindow = ({
   onClose,
-  onMinimize,
-  onMaximize,
-  maximized,
-}) => {
+  onMinimize,}) => {
   const [page, setPage] = useState("home");
   const [typing, setTyping] = useState("");
 
@@ -274,10 +245,7 @@ export const BrowserWindow = ({
       subtitle="浏览器"
       icon="edge"
       onClose={onClose}
-      onMinimize={onMinimize}
-      onMaximize={onMaximize}
-      maximized={maximized}
-      className="arg-browser-window"
+      onMinimize={onMinimize}      className="arg-browser-window"
     >
       <div className="arg-browser-tabbar">
         <div className="arg-browser-tab" data-active="true">
@@ -396,19 +364,13 @@ export const BrowserWindow = ({
 
 export const NotepadWindow = ({
   onClose,
-  onMinimize,
-  onMaximize,
-  maximized,
-}) => (
+  onMinimize,}) => (
   <PrologueWindow
     title="未命名 - 记事本"
     subtitle="记事本"
     icon="notepad"
     onClose={onClose}
-    onMinimize={onMinimize}
-    onMaximize={onMaximize}
-    maximized={maximized}
-    className="arg-note-window"
+    onMinimize={onMinimize}    className="arg-note-window"
   >
     <div className="arg-note-menu">文件　编辑　查看</div>
     <pre className="arg-note-text">{`4 月待办
@@ -424,10 +386,7 @@ export const NotepadWindow = ({
 
 export const CalculatorWindow = ({
   onClose,
-  onMinimize,
-  onMaximize,
-  maximized,
-}) => {
+  onMinimize,}) => {
   const [display, setDisplay] = useState("0");
   const [acc, setAcc] = useState(null);
   const [op, setOp] = useState(null);
@@ -494,10 +453,7 @@ export const CalculatorWindow = ({
       subtitle="标准"
       icon="calculator"
       onClose={onClose}
-      onMinimize={onMinimize}
-      onMaximize={onMaximize}
-      maximized={maximized}
-      className="arg-calc-window"
+      onMinimize={onMinimize}      className="arg-calc-window"
     >
       <div className="arg-calc-display">{display}</div>
       <div className="arg-calc-grid">
@@ -579,19 +535,13 @@ export const CalculatorWindow = ({
 
 export const SettingsWindow = ({
   onClose,
-  onMinimize,
-  onMaximize,
-  maximized,
-}) => (
+  onMinimize,}) => (
   <PrologueWindow
     title="设置"
     subtitle="系统"
     icon="settings"
     onClose={onClose}
-    onMinimize={onMinimize}
-    onMaximize={onMaximize}
-    maximized={maximized}
-    className="arg-settings-window"
+    onMinimize={onMinimize}    className="arg-settings-window"
   >
     <div className="arg-settings-main">
       <aside className="arg-settings-side">
@@ -633,16 +583,13 @@ export const SettingsWindow = ({
   </PrologueWindow>
 );
 
-export const BinWindow = ({ onClose, onMinimize, onMaximize, maximized }) => (
+export const BinWindow = ({ onClose, onMinimize }) => (
   <PrologueWindow
     title="回收站"
     subtitle="0 个项目"
     icon="bin1"
     onClose={onClose}
-    onMinimize={onMinimize}
-    onMaximize={onMaximize}
-    maximized={maximized}
-    className="arg-bin-window"
+    onMinimize={onMinimize}    className="arg-bin-window"
   >
     <div className="arg-bin-empty">
       <img src="img/icon/bin1.png" alt="" />
@@ -658,10 +605,7 @@ const RDP_ADDRESS = "10.24.7.31";
 
 export const RdpWindow = ({
   onClose,
-  onMinimize,
-  onMaximize,
-  maximized,
-  onConnect,
+  onMinimize,  onConnect,
 }) => {
   const dispatch = useDispatch();
   const [address, setAddress] = useState("");
@@ -708,10 +652,7 @@ export const RdpWindow = ({
       subtitle="Remote Desktop Connection"
       icon="rdp"
       onClose={onClose}
-      onMinimize={onMinimize}
-      onMaximize={onMaximize}
-      maximized={maximized}
-      className="arg-rdp-window"
+      onMinimize={onMinimize}      className="arg-rdp-window"
     >
       {phase === "login" ? (
         // Windows 安全凭据对话框
@@ -889,10 +830,7 @@ const vscodeSource = [
 
 export const VSCodeWindow = ({
   onClose,
-  onMinimize,
-  onMaximize,
-  maximized,
-}) => {
+  onMinimize,}) => {
   const [file, setFile] = useState("renderer.js");
 
   return (
@@ -901,10 +839,7 @@ export const VSCodeWindow = ({
       subtitle="render-lab"
       icon="code"
       onClose={onClose}
-      onMinimize={onMinimize}
-      onMaximize={onMaximize}
-      maximized={maximized}
-      className="arg-vscode-window"
+      onMinimize={onMinimize}      className="arg-vscode-window"
     >
       <div className="arg-code-main">
         <aside className="arg-code-side">
@@ -999,19 +934,13 @@ const prologueTerm = [
 
 export const PrologueTerminalWindow = ({
   onClose,
-  onMinimize,
-  onMaximize,
-  maximized,
-}) => (
+  onMinimize,}) => (
   <PrologueWindow
     title="终端 — render-lab"
     subtitle="Windows PowerShell"
     icon="terminal"
     onClose={onClose}
-    onMinimize={onMinimize}
-    onMaximize={onMaximize}
-    maximized={maximized}
-    className="arg-proterm-window"
+    onMinimize={onMinimize}    className="arg-proterm-window"
   >
     <div className="arg-proterm-body win11Scroll">
       {prologueTerm.map((line, index) => (
@@ -1026,19 +955,13 @@ export const PrologueTerminalWindow = ({
 // GitHub 仓库页：主角自己维护的项目。
 export const PrologueGithubWindow = ({
   onClose,
-  onMinimize,
-  onMaximize,
-  maximized,
-}) => (
+  onMinimize,}) => (
   <PrologueWindow
     title="you / render-lab"
     subtitle="GitHub"
     icon="github"
     onClose={onClose}
-    onMinimize={onMinimize}
-    onMaximize={onMaximize}
-    maximized={maximized}
-    className="arg-github-window"
+    onMinimize={onMinimize}    className="arg-github-window"
   >
     <div className="arg-gh-head">
       <div className="arg-gh-repo">

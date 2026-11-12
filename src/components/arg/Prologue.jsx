@@ -45,12 +45,10 @@ const FloatingWindow = ({
   z,
   active,
   minimized,
-  maximized,
   snap,
   onFocus,
   onClose,
   onMinimize,
-  onMaximize,
   onSnap,
   children,
 }) => {
@@ -75,10 +73,9 @@ const FloatingWindow = ({
     windowPositions[id] = next;
   };
 
-  // 根据指针位置决定吸附区域。靠近顶部 = 最大化，左/右边缘 = 半屏。
+  // 根据指针位置决定吸附区域。只保留左/右半屏，不再有顶部最大化。
   const snapZoneAt = (x, y) => {
     const edge = 24;
-    if (y <= edge) return "top";
     if (x <= edge) return "left";
     if (x >= window.innerWidth - edge) return "right";
     return null;
@@ -86,7 +83,6 @@ const FloatingWindow = ({
 
   const startDrag = (event) => {
     onFocus(id);
-    if (maximized) return;
     if (event.button !== 0) return;
     if (event.target.closest("button, input, a, [contenteditable]")) return;
 
@@ -145,16 +141,6 @@ const FloatingWindow = ({
       opacity: 0,
       pointerEvents: "none",
     };
-  } else if (maximized || snap === "top") {
-    // 父容器 .arg-prologue-desktop 已经让开任务栏（inset: 0 0 48px），
-    // 所以这里直接用 100%，不能再减 48px。
-    style = {
-      left: 0,
-      top: 0,
-      width: "100%",
-      height: "100%",
-      transform: "none",
-    };
   } else if (snap === "left" || snap === "right") {
     style = {
       left: snap === "left" ? 0 : "50%",
@@ -187,9 +173,7 @@ const FloatingWindow = ({
         className="arg-win-host"
         data-active={active ? "true" : "false"}
         data-moved={pos ? "true" : "false"}
-        data-minimized={minimized ? "true" : "false"}
-        data-maximized={maximized || snap === "top" ? "true" : "false"}
-        data-snap={snap || "none"}
+        data-minimized={minimized ? "true" : "false"}        data-snap={snap || "none"}
         data-dragging={dragging ? "true" : "false"}
         style={{ ...style, zIndex: z }}
         onPointerDown={startDrag}
@@ -201,8 +185,6 @@ const FloatingWindow = ({
         {children({
           onClose: () => onClose(id),
           onMinimize: () => onMinimize(id),
-          onMaximize: () => onMaximize(id),
-          maximized: maximized || snap === "top",
         })}
       </div>
     </>
@@ -354,7 +336,7 @@ const Prologue = () => {
       }
       return [
         ...prev,
-        { id, z: zRef.current, minimized: false, maximized: false },
+        { id, z: zRef.current, minimized: false },
       ];
     });
   }, []);
@@ -371,8 +353,7 @@ const Prologue = () => {
         item.id === id
           ? {
               ...item,
-              snap: zone === "top" ? null : zone,
-              maximized: zone === "top",
+              snap: zone,
               minimized: false,
               z: zRef.current,
             }
@@ -387,22 +368,6 @@ const Prologue = () => {
         item.id === id ? { ...item, minimized: true, z: -1 } : item,
       ),
     );
-  }, []);
-
-  const maximize = useCallback((id) => {
-    setOpenWindows((prev) => {
-      zRef.current += 1;
-      return prev.map((item) =>
-        item.id === id
-          ? {
-              ...item,
-              maximized: !item.maximized,
-              minimized: false,
-              z: zRef.current,
-            }
-          : item,
-      );
-    });
   }, []);
 
   // 任务栏：窗口已打开且在最前 → 最小化；已打开但被压住 → 提到最前；未打开 → 打开。
@@ -546,30 +511,6 @@ const Prologue = () => {
                 aria-hidden="true"
               >
                 <path d="M1 5h8" stroke="currentColor" strokeWidth="1.1" />
-              </svg>
-            </button>
-            <button
-              type="button"
-              className="arg-app-ctl"
-              aria-label={handlers.maximized ? "向下还原" : "最大化"}
-              title={handlers.maximized ? "向下还原" : "最大化"}
-              onClick={handlers.onMaximize}
-            >
-              <svg
-                viewBox="0 0 10 10"
-                width="10"
-                height="10"
-                aria-hidden="true"
-              >
-                <rect
-                  x="1.5"
-                  y="1.5"
-                  width="7"
-                  height="7"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.1"
-                />
               </svg>
             </button>
             <button
@@ -811,12 +752,10 @@ const Prologue = () => {
               z={item.z}
               active={topWindow && topWindow.id === "mail"}
               minimized={item.minimized}
-              maximized={item.maximized}
               snap={item.snap}
               onFocus={focus}
               onClose={close}
               onMinimize={minimize}
-              onMaximize={maximize}
               onSnap={snapWindow}
             >
               {(handlers) => renderMail(handlers)}
@@ -829,12 +768,10 @@ const Prologue = () => {
               z={item.z}
               active={topWindow && topWindow.id === item.id}
               minimized={item.minimized}
-              maximized={item.maximized}
               snap={item.snap}
               onFocus={focus}
               onClose={close}
               onMinimize={minimize}
-              onMaximize={maximize}
               onSnap={snapWindow}
             >
               {(handlers) => renderWindow(item.id, handlers)}
