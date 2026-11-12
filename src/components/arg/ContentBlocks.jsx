@@ -1,5 +1,85 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./content.scss";
+
+// 复制一段文本。clipboard API 只在安全上下文（https / localhost）可用，
+// 所以保留 textarea + execCommand 的回退，避免 http 环境下点了没反应。
+const copyText = async (text) => {
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch (err) {
+    // 落到下面的回退
+  }
+
+  try {
+    const area = document.createElement("textarea");
+    area.value = text;
+    area.setAttribute("readonly", "");
+    area.style.position = "fixed";
+    area.style.top = "-1000px";
+    area.style.opacity = "0";
+    document.body.appendChild(area);
+    area.select();
+    const ok = document.execCommand("copy");
+    document.body.removeChild(area);
+    return ok;
+  } catch (err) {
+    return false;
+  }
+};
+
+// 可复制的代码块。
+// 单行短值（IP、密钥、命令）做成紧凑的 chip；多行内容保留原样，角落放复制按钮。
+const CodeBlock = ({ text }) => {
+  const [copied, setCopied] = useState(false);
+  const timer = useRef(null);
+
+  const raw = String(text ?? "");
+  const multiline = raw.includes("\n");
+
+  useEffect(() => {
+    return () => {
+      if (timer.current) clearTimeout(timer.current);
+    };
+  }, []);
+
+  const copy = async () => {
+    const ok = await copyText(raw);
+    if (!ok) return;
+    setCopied(true);
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(() => setCopied(false), 1600);
+  };
+
+  return (
+    <div
+      className="arg-code-wrap"
+      data-multiline={multiline ? "true" : "false"}
+      data-copied={copied ? "true" : "false"}
+    >
+      <pre
+        className="arg-block-code"
+        onClick={copy}
+        title="点击复制"
+      >
+        {raw}
+      </pre>
+      <button
+        type="button"
+        className="arg-code-copy"
+        aria-label={copied ? "已复制" : "复制"}
+        onClick={(event) => {
+          event.stopPropagation();
+          copy();
+        }}
+      >
+        {copied ? "已复制" : "复制"}
+      </button>
+    </div>
+  );
+};
 
 // 剧情 block 渲染器。日记、文件预览、浏览器页面共用。
 export const ContentBlocks = ({ blocks, className = "" }) => {
@@ -16,11 +96,7 @@ export const ContentBlocks = ({ blocks, className = "" }) => {
               </h3>
             );
           case "code":
-            return (
-              <pre key={index} className="arg-block-code">
-                {block.text}
-              </pre>
-            );
+            return <CodeBlock key={index} text={block.text} />;
           case "quote":
             return (
               <blockquote key={index} className="arg-block-quote">

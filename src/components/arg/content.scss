@@ -24,7 +24,7 @@
   }
 
   .arg-block-code {
-    margin: 14px 0;
+    margin: 0;
     padding: 12px 14px;
     overflow-x: auto;
     border-radius: 6px;
@@ -45,6 +45,76 @@
     font-style: normal;
   }
 
+  // 可复制的代码块容器。
+  // 单行短值（IP、密钥、命令）做成 chip：紧凑、可点击、右侧浮出复制按钮。
+  // 多行内容保持块状，复制按钮固定在右上角。
+  .arg-code-wrap {
+    position: relative;
+    margin: 14px 0;
+
+    .arg-block-code {
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition:
+        border-color 160ms ease,
+        background 160ms ease;
+    }
+
+    &:hover .arg-block-code {
+      border-color: var(--arg-code-border, rgba(76, 194, 255, 0.35));
+    }
+
+    .arg-code-copy {
+      position: absolute;
+      top: 50%;
+      right: 8px;
+      padding: 3px 9px;
+      border: 1px solid var(--arg-code-border, rgba(127, 127, 127, 0.3));
+      border-radius: 4px;
+      background: var(--arg-code-btn-bg, rgba(255, 255, 255, 0.9));
+      color: var(--arg-code-btn-fg, var(--arg-muted, inherit));
+      font-family: inherit;
+      font-size: 11px;
+      line-height: 1.6;
+      white-space: nowrap;
+      cursor: pointer;
+      opacity: 0;
+      transform: translateY(-50%);
+      transition:
+        opacity 160ms ease,
+        border-color 160ms ease,
+        color 160ms ease;
+    }
+
+    &:hover .arg-code-copy,
+    &:focus-within .arg-code-copy {
+      opacity: 1;
+    }
+
+    &[data-copied="true"] .arg-code-copy {
+      opacity: 1;
+      border-color: var(--arg-accent, #4cc2ff);
+      color: var(--arg-accent, #4cc2ff);
+    }
+
+    // 单行：紧凑 chip，右侧留出按钮位置，整段可一次性选中。
+    &[data-multiline="false"] .arg-block-code {
+      display: inline-block;
+      padding-right: 62px;
+      letter-spacing: 0.3px;
+      user-select: all;
+    }
+
+    &[data-multiline="false"] .arg-code-copy {
+      font-size: 10px;
+    }
+
+    // 多行：按钮移到右上角，避开正文首行。
+    &[data-multiline="true"] .arg-code-copy {
+      top: 8px;
+      transform: none;
+    }
+  }
   .arg-block-hint {
     margin: 16px 0;
     padding: 10px 12px;
