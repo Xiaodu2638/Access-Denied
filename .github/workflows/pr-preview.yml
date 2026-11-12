@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: marocchino/sticky-pull-request-comment@v2
+      - uses: marocchino/sticky-pull-request-comment@v3
         with:
           GITHUB_TOKEN: ${{ secrets.BOT }}
           message: |
@@ -58,7 +58,7 @@ jobs:
         shell: bash
 
       - name: Comment
-        uses: marocchino/sticky-pull-request-comment@v2
+        uses: marocchino/sticky-pull-request-comment@v3
         with:
           GITHUB_TOKEN: ${{ secrets.BOT }}
           message: |
@@ -71,7 +71,7 @@ jobs:
             | **Deploy Log:** | ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} |
 
       - if: ${{ failure() }}
-        uses: marocchino/sticky-pull-request-comment@v2
+        uses: marocchino/sticky-pull-request-comment@v3
         with:
           GITHUB_TOKEN: ${{ secrets.BOT }}
           message: |
