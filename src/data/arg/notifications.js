@@ -1,68 +1,68 @@
 // 系统通知。两种触发方式：
-//   delay  —— 桌面解锁后经过多少毫秒弹出
+//   delay  —— 进入远程桌面后经过多少毫秒弹出
 //   flags  —— 当这些进度标记全部为真时弹出
 // 同一个 id 只会弹一次，记录在 arg.notificationsSeen。
 
+export const notificationMeta = {
+  duration: 6400,
+  maxVisible: 3,
+};
+
 export const notifications = [
   {
-    id: "n-boot-01",
-    delay: 12000,
-    title: "系统",
-    body: "检测到上次会话未正常结束。",
+    id: "n-window-01",
+    delay: 45000,
+    title: "资产平台",
+    body: "CM-07 的回收窗口将在 18:00 关闭。",
     tone: "warn",
   },
   {
-    id: "n-gitlog-01",
-    flags: ["gitLog"],
-    title: "Git",
-    body: "检测到 3 条无签名提交。是否信任当前仓库？",
+    id: "n-scan-01",
+    flags: ["assetScanned"],
+    title: "磁盘",
+    body: "本机磁盘数量与资产登记不一致。",
     tone: "warn",
   },
   {
-    id: "n-unlock-01",
-    flags: ["unlocked"],
-    title: "安全中心",
-    body: "加密目录已被挂载。此操作已被记录。",
-    tone: "danger",
-  },
-  {
-    id: "n-corrupt-01",
-    flags: ["corrupted"],
-    title: "文件校验",
-    body: "校验失败：logs/daemon.log 已被其他会话修改。",
-    tone: "danger",
-  },
-  {
-    id: "n-restore-01",
-    flags: ["restored"],
-    title: "回收站",
-    body: "linche_final.mp4 已恢复。",
+    id: "n-mount-01",
+    flags: ["partitionMounted"],
+    title: "分区",
+    body: "卷「我的测绘」已挂载到 D:。",
     tone: "info",
   },
   {
-    id: "n-dump-01",
-    flags: ["readDump"],
-    title: "磁盘",
-    body: "0x0342.dump 写入完成。",
-    tone: "danger",
+    id: "n-copy-01",
+    flags: ["handoverCopied"],
+    title: "交接盘",
+    body: "Z:\\交接 已写入文件。",
+    tone: "info",
   },
   {
-    id: "n-dontrun-01",
-    flags: ["ranScript"],
-    title: "身份服务",
-    body: "检测到未授权的身份操作。此设备已被标记。",
-    tone: "danger",
+    id: "n-draft-01",
+    flags: ["mailDraftOpen"],
+    title: "邮件",
+    body: "草稿箱里有 1 封未发出的邮件。",
+    tone: "warn",
+  },
+  {
+    id: "n-mail-01",
+    flags: ["mailSent"],
+    title: "邮件",
+    body: "1 封邮件已从本机发出。",
+    tone: "info",
+  },
+  {
+    id: "n-zhou-01",
+    flags: ["zhouVisited"],
+    title: "资产平台",
+    body: "ZJ-03 状态已上报。",
+    tone: "info",
+  },
+  {
+    id: "n-retire-01",
+    flags: ["retireReady"],
+    title: "回收工具",
+    body: "回收码已校验。",
+    tone: "warn",
   },
 ];
-
-export const notificationTone = {
-  info: "info",
-  warn: "warn",
-  danger: "danger",
-};
-
-// 持续时间由组件控制；这里只放文案侧的可调项。
-export const notificationMeta = {
-  maxVisible: 3,
-  duration: 9000,
-};

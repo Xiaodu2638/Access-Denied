@@ -1,8 +1,8 @@
 import icons from "./apps";
 import { shell } from "../data/arg/config";
 
-// 读取 ARG 自己的命名空间，避免旧版 win11React 的
-// desktop / taskbar / pinned / recent 把已删除的应用带回来。
+// 读取 ARG 自己的命名空间。key 升到 v2，避免旧的 win11React / 旧版剧情
+// 把已经删除的应用（session.js 等）带回桌面。
 const readList = (key, fallback) => {
   try {
     const raw = localStorage.getItem(key);
@@ -14,13 +14,10 @@ const readList = (key, fallback) => {
   }
 };
 
-const taskbar = readList("arg_taskbar", shell.taskbar);
-// session.js 不再属于桌面。旧 localStorage 里可能还留着它，这里强制剔除。
-const desktop = readList("arg_desktop", shell.desktop).filter(
-  (name) => name !== "session.js",
-);
-const pinned = readList("arg_pinned", shell.pinned);
-const recent = readList("arg_recent", shell.recent);
+const taskbar = readList("arg_taskbar_v2", shell.taskbar);
+const desktop = readList("arg_desktop_v2", shell.desktop);
+const pinned = readList("arg_pinned_v2", shell.pinned);
+const recent = readList("arg_recent_v2", shell.recent);
 
 const pick = (names) =>
   icons

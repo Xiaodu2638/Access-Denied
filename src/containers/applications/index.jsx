@@ -5,11 +5,13 @@ import "./tabs2.scss";
 import "./wnapp.scss";
 import "./apps/assets/arg-window.scss";
 
-export * from "./apps/dontrun";
+export * from "./apps/asset";
 export * from "./apps/edge";
 export * from "./apps/explorer";
 export * from "./apps/notepad";
+export * from "./apps/partition";
 export * from "./apps/recyclebin";
+export * from "./apps/retire";
 export * from "./apps/terminal";
 
 export const ScreenPreview = () => {

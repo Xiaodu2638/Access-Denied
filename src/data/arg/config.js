@@ -1,85 +1,97 @@
-// 「未授权访问」全局配置。
+// 《石桥》全局配置。
 // 剧情文案与可调参数集中在这里，组件只读取，不硬编码。
 
-export const ARG_VERSION = 1;
+export const ARG_VERSION = 2;
 
 // 剧情进度**不写** localStorage：刷新页面即从引子重新开始。
 // 这里保留 key 仅作为历史命名说明，以及方便调试时清理旧数据。
-export const ARG_STORAGE_KEY = "arg_progress_v1";
+export const ARG_STORAGE_KEY = "arg_progress_v2";
 
 export const brand = {
-  title: "未授权访问",
-  codename: "ACCESS DENIED",
-  session: "会话恢复中",
-  user: "linche",
-  currentUser: "unknown",
-  lastLogin: "2031-04-19 03:42",
-  hostname: "LIN-DESKTOP",
-  project: "linche-agent",
-  tagline: "有人替你保留了这台机器的会话。",
+  title: "石桥",
+  codename: "THE BRIDGE",
+  tagline: "库区测绘 · 资产回收",
 };
 
-export const lock = {
-  user: brand.user,
-  currentUser: brand.currentUser,
-  lastLogin: brand.lastLogin,
-  session: brand.session,
-  wallpaper: "arg/127.0.0.1.png",
-  puzzle: {
-    // 不在锁屏上解释谜题。恢复令牌只出现在引子的会话日志里。
-    mode: "credential",
-    answerHash: "c797c778", // FNV-1a 32bit of "834"
-    hashAlgo: "fnv1a32",
-    placeholder: "输入恢复密钥",
-    submit: "恢复会话",
-    wrongText: "恢复密钥错误。",
-    successText: "会话已恢复。",
-    successDelay: 1200,
-    hint: "",
-    hintAfter: 99,
-    notice: {
-      title: "系统提示",
-      body: "远程会话未正常结束。",
-    },
+// 主角本机的账号。玩家是接单的 IT 外包，不参与测绘。
+export const player = {
+  user: "you",
+  account: "you@local",
+  hostname: "YOU-PC",
+  company: "作为外包 · 资产回收组",
+};
+
+// 世界里两家公司：一家做数据回收，一家是项目业主。
+export const companies = {
+  vendor: "云图数据服务",
+  client: "石桥水利枢纽建设管理局",
+  survey: "江河测绘院",
+  paper: "河口晚报",
+};
+
+// 退休工具需要的回收码。和 RDP 密码不是同一个东西。
+export const retireCode = "4471";
+
+// 剧情时间线。玩家在 2031-06-15 傍晚接单，
+// 远程机器的最后一次本地操作停在 06-12 17:40 —— 陈默离开的那天。
+export const timeline = {
+  now: "2031-06-15 17:34",
+  nowLabel: "2031 年 6 月 15 日 · 星期日",
+  clock: { hour: 17, minute: 34 },
+  clockLabel: "06/15/31",
+  remoteLastWrite: "2031-06-12 17:40",
+  // 陈默给邮件设过这个时间，但机器从 6 月 12 日就断线了，任务没有执行。
+  mailScheduled: "2031-06-15 17:40",
+};
+
+// 远程资产。address / user / password 都能在工单邮件里找到。
+export const machines = {
+  chenmo: {
+    id: "chenmo",
+    hostname: "CM-07",
+    address: "10.24.7.31",
+    user: "chenmo",
+    password: "CM-07-3117",
+    owner: "陈默",
+    role: "测绘二队 · 外业",
+    site: "石桥库区",
+    label: "石桥库区测绘工作站",
+  },
+  zhou: {
+    id: "zhou",
+    hostname: "ZJ-03",
+    address: "10.24.7.44",
+    user: "zhouning",
+    password: "ZJ-03-4482",
+    owner: "周宁",
+    role: "测绘二队 · 内业",
+    site: "石桥库区",
+    label: "测绘二队内业机",
+    // 第二台资产没有分配回收任务，回收工具里只显示这一句。
+    retireTask: false,
   },
 };
 
-// 会话连接日志。引子邮件里展示的是这份内容。
-// 这里刻意不写恢复密钥：密码只能在本机的旧终端记录里找到。
-export const sessionLog = [
-  "[03:41:58] 解析 rdp://03:42.unknown",
-  "[03:42:00] 目标主机 LIN-DESKTOP",
-  "[03:42:02] 会话 0x0342 已建立",
-  "[03:42:03] 用户 linche",
-  "[03:42:07] 恢复凭据 已校验",
-  "[03:42:07] 会话未正常结束",
-];
-
-// 桌面与任务栏的默认应用名，模块 3 会用到。
+// 桌面与任务栏的默认应用名。名字必须和 utils/apps.js 里的条目一致。
 export const shell = {
-  // 桌面上只放系统应用。session.js 不在这里：
-  // 脚本在 linche-agent 仓库里，玩家得自己翻进去。
-  desktop: ["记事本", "文件管理器", "浏览器", "终端", "回收站"],
-  taskbar: ["文件管理器", "浏览器", "终端", "记事本"],
-  pinned: ["记事本", "文件管理器", "浏览器", "终端"],
-  recent: ["记事本", "文件管理器", "终端"],
+  desktop: [
+    "文件管理器",
+    "浏览器",
+    "记事本",
+    "资产盘点",
+    "分区修复",
+    "回收工具",
+    "回收站",
+  ],
+  taskbar: ["文件管理器", "浏览器", "记事本", "终端", "回收工具"],
+  pinned: ["文件管理器", "浏览器", "终端", "资产盘点", "回收工具"],
+  recent: ["文件管理器", "浏览器", "终端"],
 };
 
-// 剧情时间线，界面上的“系统时间”和日志都以它为准。
-// 全部为虚构日期：事故发生在 2031-04-19 03:42（星期六），
-// 主角在 2031-04-22（星期二）从自己的电脑连进来。
-// 远程机器被挂起在事故那一刻，所以桌面与锁屏的时钟都停在 04-19 03:42。
-export const timeline = {
-  incident: "2031-04-19 03:42",
-  incidentLabel: "2031 年 4 月 19 日 · 星期六",
-  lastCommit: "2031-04-19 03:42:07",
-  lastCommitHash: "4f1c0de",
-  lastCommitMessage: "chore(agent): 清理维护者痕迹",
-  daysMissing: 3,
-  // 主角自己的电脑：引子邮件与延迟发送都以这一天为准。
-  today: "2031-04-22",
-  todayLabel: "2031 年 4 月 22 日 · 星期二",
-  // 远程桌面的时钟：停在会话恢复的那一刻。
-  desktopClock: { hour: 3, minute: 42 },
-  desktopClockLabel: "04/19/31",
+// 交接盘在网络位置，不占本地磁盘。放在这里方便两头引用。
+export const handoverDrive = {
+  id: "Z:",
+  name: "Z:",
+  label: "交接盘 (Z:)",
+  path: "Z:\\交接",
 };

@@ -46,6 +46,17 @@ const topZ = (state) => {
 
 const appReducer = (state = defState, action) => {
   var tmpState = { ...state };
+  if (action.type == "APPS_HIDE_ALL") {
+    // 切换资产 / 断开连接时把远程桌面上的窗口全部收掉。
+    Object.keys(tmpState).forEach((key) => {
+      if (key === "hz") return;
+      const obj = tmpState[key];
+      if (!obj || typeof obj !== "object") return;
+      tmpState[key] = { ...obj, hide: true, max: null, z: -1 };
+    });
+    tmpState.hz = 2;
+    return tmpState;
+  }
   if (action.type == "EDGELINK") {
     var obj = { ...tmpState["edge"] };
     if (action.payload && action.payload.startsWith("http")) {

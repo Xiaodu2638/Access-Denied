@@ -410,34 +410,6 @@
   }
 }
 
-.arg-mail-action {
-  padding: 14px 24px 20px;
-  border-top: 1px solid #eef1f4;
-  background: #fbfcfd;
-
-  button {
-    padding: 9px 20px;
-    border: 1px solid #0f6cbd;
-    border-radius: 4px;
-    background: #0f6cbd;
-    color: #fff;
-    font-size: 13px;
-    letter-spacing: 1px;
-    cursor: pointer;
-    transition: background 140ms ease;
-
-    &:hover {
-      background: #0c5a9e;
-    }
-  }
-}
-
-.arg-mail-action-hint {
-  margin-top: 7px;
-  font-size: 10px;
-  color: #8a96a3;
-}
-
 // 任务栏
 .arg-prologue-taskbar {
   position: absolute;
@@ -1553,9 +1525,11 @@
 
 // 连接远程桌面
 .arg-connecting {
-  position: absolute;
+  position: fixed;
   inset: 0;
-  z-index: 2;
+  // 必须高于桌面上的窗口（10+）、任务栏（1000）和开始菜单（2000），
+  // 否则连接时会看见主角自己的窗口叠在加载画面上。
+  z-index: 3000;
   display: grid;
   place-items: center;
   background: #05070a;

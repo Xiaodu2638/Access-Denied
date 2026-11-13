@@ -31,7 +31,8 @@ const copyText = async (text) => {
 };
 
 // 可复制的代码块。
-// 单行短值（IP、密钥、命令）做成紧凑的 chip；多行内容保留原样，角落放复制按钮。
+// 文本本身可以被选中、复制；复制按钮只是给不想手动选的人一个快捷方式。
+// 点正文不会触发复制。
 const CodeBlock = ({ text }) => {
   const [copied, setCopied] = useState(false);
   const timer = useRef(null);
@@ -59,21 +60,12 @@ const CodeBlock = ({ text }) => {
       data-multiline={multiline ? "true" : "false"}
       data-copied={copied ? "true" : "false"}
     >
-      <pre
-        className="arg-block-code"
-        onClick={copy}
-        title="点击复制"
-      >
-        {raw}
-      </pre>
+      <pre className="arg-block-code">{raw}</pre>
       <button
         type="button"
         className="arg-code-copy"
         aria-label={copied ? "已复制" : "复制"}
-        onClick={(event) => {
-          event.stopPropagation();
-          copy();
-        }}
+        onClick={copy}
       >
         {copied ? "已复制" : "复制"}
       </button>

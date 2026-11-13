@@ -166,7 +166,7 @@ const Taskbar = () => {
                 minute: "numeric",
               })}
             </div>
-            <div>{timeline.desktopClockLabel}</div>
+            <div>{timeline.clockLabel}</div>
           </div>
           <Icon className="graybd my-4" ui width={6} click="SHOWDSK" pr />
         </div>

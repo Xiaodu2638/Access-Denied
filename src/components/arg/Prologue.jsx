@@ -5,21 +5,23 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useDispatch } from "react-redux";
-import { prologue } from "../../data/arg/prologue";
-import { lock } from "../../data/arg/config";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  emailsFor,
+  localFoldersFor,
+  prologue,
+  rdpMachinesFor,
+} from "../../data/arg/prologue";
 import { ContentBlocks } from "./ContentBlocks";
+import { Plate } from "./Plates";
 import {
   BinWindow,
   BrowserWindow,
-  CalculatorWindow,
   NotepadWindow,
   PcWindow,
-  PrologueGithubWindow,
   PrologueTerminalWindow,
   RdpWindow,
   SettingsWindow,
-  VSCodeWindow,
 } from "./PrologueWindows";
 import "./prologue.scss";
 
@@ -27,9 +29,9 @@ import "./prologue.scss";
 // 桌面按真实 Windows 的操作习惯实现：
 // 单击选中、双击打开、窗口可拖动、任务栏有运行指示、开始菜单点外部关闭。
 
-// 任务栏常驻应用。必须都是 prologue.desktopIcons 里存在的 id，
+// 任务栏常驻应用。必须都是 prologue.desktopIcons / startMenuOnly 里存在的 id，
 // 否则任务栏会渲染出点不动的图标。
-const taskbarIds = ["vscode", "terminal", "github", "browser", "mail"];
+const taskbarIds = ["mail", "pc", "browser", "terminal", "notes", "rdp"];
 
 // 窗口位置只在本次会话内记住：刷新页面就回到默认居中。
 const windowPositions = {};
@@ -173,7 +175,8 @@ const FloatingWindow = ({
         className="arg-win-host"
         data-active={active ? "true" : "false"}
         data-moved={pos ? "true" : "false"}
-        data-minimized={minimized ? "true" : "false"}        data-snap={snap || "none"}
+        data-minimized={minimized ? "true" : "false"}
+        data-snap={snap || "none"}
         data-dragging={dragging ? "true" : "false"}
         style={{ ...style, zIndex: z }}
         onPointerDown={startDrag}
@@ -193,11 +196,23 @@ const FloatingWindow = ({
 
 const Prologue = () => {
   const dispatch = useDispatch();
+  const arg = useSelector((state) => state.arg);
+  const phase = arg.phase;
+
+  const emails = useMemo(() => emailsFor(phase, arg), [phase, arg]);
+  const machines = useMemo(
+    () => rdpMachinesFor(phase, arg),
+    [phase, arg],
+  );
+  const folders = useMemo(
+    () => localFoldersFor(phase, arg),
+    [phase, arg],
+  );
 
   // 已打开的窗口：[{ id, z }]，数组顺序即打开顺序。
   const [openWindows, setOpenWindows] = useState([]);
   const [selectedIcon, setSelectedIcon] = useState(null);
-  const [selectedId, setSelectedId] = useState(prologue.emails[0].id);
+  const [selectedId, setSelectedId] = useState(emails[0] ? emails[0].id : null);
   // 邮件原文：默认收起，和真实邮件客户端一样藏在“查看原文”里。
   const [mailSource, setMailSource] = useState(false);
   const [startOpen, setStartOpen] = useState(false);
@@ -207,10 +222,12 @@ const Prologue = () => {
   // 最近使用的应用 id（最新在前），只存内存，不跨刷新。
   const [recentApps, setRecentApps] = useState([]);
   const [now, setNow] = useState(() => {
-    const [h, m] = prologue.host.time.split(":").map(Number);
+    const clock = phase === "aftermath" ? prologue.host.aftermathTime : prologue.host.time;
+    const [h, m] = clock.split(":").map(Number);
     return { h, m };
   });
   const [stage, setStage] = useState("desktop");
+  const [target, setTarget] = useState("chenmo");
   const [lineCount, setLineCount] = useState(0);
   const [done, setDone] = useState(false);
 
@@ -228,9 +245,91 @@ const Prologue = () => {
   const switchIndex = useRef(0);
 
   const selected = useMemo(
-    () => prologue.emails.find((email) => email.id === selectedId),
-    [selectedId],
+    () => emails.find((email) => email.id === selectedId) || emails[0],
+    [emails, selectedId],
   );
+
+  // 打开一封信就等于读过它。未读标记只由这里点亮。
+  useEffect(() => {
+    if (!selected) return;
+    dispatch({ type: "ARG_MAIL_READ", payload: selected.id });
+  }, [selected, dispatch]);
+
+  // 引子开场：玩家刚坐下，先让他看到桌面，5.5 秒后再提示收件箱有未读。
+  // 只陈述数量，不催、不指路。
+  // 用 ref 读最新值，避免定时器闭包拿到 5.5 秒前的旧邮件列表。
+  const latestMail = useRef({ emails, seen: arg.mailSeen });
+  latestMail.current = { emails, seen: arg.mailSeen };
+
+  const introDone = useRef(false);
+  useEffect(() => {
+    if (phase !== "prologue" || introDone.current) return undefined;
+
+    const timer = setTimeout(() => {
+      introDone.current = true;
+
+      const { emails: now, seen } = latestMail.current;
+      const unread = now.filter(
+        (email) => email.unread === true && !seen.includes(email.id),
+      );
+      if (!unread.length) return;
+
+      unread.forEach((email) =>
+        dispatch({ type: "ARG_MAIL_SEEN", payload: email.id }),
+      );
+      dispatch({
+        type: "ARG_TOAST_PUSH",
+        payload: {
+          id: "mail-intro",
+          title: "邮件",
+          body:
+            unread.length === 1
+              ? `1 封未读：${unread[0].subject}`
+              : `${unread.length} 封未读邮件`,
+          tone: "info",
+          sound: "mail",
+        },
+      });
+    }, 5500);
+
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase]);
+
+  // 之后新到的邮件（回家后的回执、ZJ-03 工单等）：按 id 差集提示。
+  const knownMail = useRef(null);
+  useEffect(() => {
+    if (!emails.length) return;
+
+    const ids = emails.map((email) => email.id);
+
+    if (knownMail.current === null) {
+      knownMail.current = ids;
+      return;
+    }
+
+    const fresh = emails.filter(
+      (email) => !knownMail.current.includes(email.id),
+    );
+    knownMail.current = ids;
+    if (!fresh.length) return;
+
+    // 收件箱最新在前，提示也按同一顺序入队。
+    [...fresh].reverse().forEach((email) => {
+      dispatch({ type: "ARG_MAIL_SEEN", payload: email.id });
+      dispatch({
+        type: "ARG_TOAST_PUSH",
+        payload: {
+          id: `mail-${email.id}`,
+          title: "新邮件",
+          body: `${email.fromName}：${email.subject}`,
+          tone: "info",
+          sound: "mail",
+        },
+      });
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [emails]);
 
   // 切到另一封信时收起原文，避免把上一封的邮件头留在下面。
   useEffect(() => {
@@ -276,7 +375,10 @@ const Prologue = () => {
   useEffect(() => {
     if (stage !== "connecting") return;
 
-    const { lines, stepDelay, holdDelay, fadeDelay } = prologue.connect;
+    const script =
+      prologue.connect.scripts[target] || prologue.connect.scripts.chenmo;
+    const { stepDelay, holdDelay, fadeDelay } = prologue.connect;
+    const { lines } = script;
     const timers = [];
 
     lines.forEach((_, index) => {
@@ -290,18 +392,17 @@ const Prologue = () => {
     timers.push(setTimeout(() => setDone(true), total));
     timers.push(
       setTimeout(() => {
-        // RDP 已经验证过密码，连接完成就直接进入桌面，
-        // 不再让锁屏问第二遍。
-        dispatch({ type: "WALLUNLOCK" });
-        dispatch({
-          type: "ARG_FLAG",
-          payload: { flag: "prologueSeen", value: true },
-        });
+        dispatch({ type: "APPS_HIDE_ALL" });
+        dispatch({ type: "ARG_HOST", payload: target });
+        if (target === "zhou") {
+          dispatch({ type: "ARG_FLAG", payload: { flag: "zhouVisited" } });
+        }
+        dispatch({ type: "ARG_PHASE", payload: "remote" });
       }, total + fadeDelay),
     );
 
     return () => timers.forEach((timer) => clearTimeout(timer));
-  }, [stage, dispatch]);
+  }, [stage, target, dispatch]);
 
   const focus = useCallback((id) => {
     setOpenWindows((prev) => {
@@ -379,8 +480,12 @@ const Prologue = () => {
     return open(id);
   };
 
-  const connect = () => {
+  const connect = (machineId) => {
     if (stage !== "desktop") return;
+    setTarget(machineId || machines[0].id);
+    setLineCount(0);
+    setDone(false);
+    setStartOpen(false);
     setStage("connecting");
   };
 
@@ -445,30 +550,25 @@ const Prologue = () => {
 
   const renderWindow = (id, handlers) => {
     switch (id) {
-      case "vscode":
-        return <VSCodeWindow {...handlers} />;
       case "terminal":
         return <PrologueTerminalWindow {...handlers} />;
-      case "github":
-        return <PrologueGithubWindow {...handlers} />;
       case "rdp":
         return (
           <RdpWindow
             {...handlers}
-            onConnect={() => {
+            machines={machines}
+            onConnect={(machine) => {
               handlers.onClose();
-              connect();
+              connect(machine.id);
             }}
           />
         );
       case "pc":
-        return <PcWindow {...handlers} />;
+        return <PcWindow {...handlers} folders={folders} phase={phase} />;
       case "browser":
         return <BrowserWindow {...handlers} />;
-      case "notepad":
+      case "notes":
         return <NotepadWindow {...handlers} />;
-      case "calculator":
-        return <CalculatorWindow {...handlers} />;
       case "settings":
         return <SettingsWindow {...handlers} />;
       case "bin":
@@ -553,7 +653,7 @@ const Prologue = () => {
           </aside>
 
           <section className="arg-mail-list">
-            {prologue.emails.map((email) => (
+            {emails.map((email) => (
               <button
                 key={email.id}
                 type="button"
@@ -604,17 +704,6 @@ const Prologue = () => {
                 ) : null}
                 <ContentBlocks blocks={selected.blocks} />
               </div>
-
-              {selected.action ? (
-                <div className="arg-mail-action">
-                  <button type="button" onClick={connect}>
-                    {selected.action.label}
-                  </button>
-                  <div className="arg-mail-action-hint">
-                    {selected.action.hint}
-                  </div>
-                </div>
-              ) : null}
             </article>
           ) : null}
         </div>
@@ -626,15 +715,14 @@ const Prologue = () => {
   const menuIcons = [...orderedIcons, ...prologue.startMenuOnly];
 
   // 任务栏先放常驻应用，再把已打开但不在常驻列表里的应用追加进去。
-  const pinnedTaskbar = prologue.desktopIcons.filter((icon) =>
+  // 任务栏先放常驻应用，再把已打开但不在常驻列表里的应用追加进去。
+  // rdp 只在开始菜单里，所以要从两个列表里一起找。
+  const allIcons = [...prologue.desktopIcons, ...prologue.startMenuOnly];
+  const pinnedTaskbar = allIcons.filter((icon) =>
     taskbarIds.includes(icon.id),
   );
   const runningExtras = openWindows
-    .map((item) =>
-      [...prologue.desktopIcons, ...prologue.startMenuOnly].find(
-        (icon) => icon.id === item.id,
-      ),
-    )
+    .map((item) => allIcons.find((icon) => icon.id === item.id))
     .filter((icon) => icon && !taskbarIds.includes(icon.id));
   const taskbarApps = [...pinnedTaskbar, ...runningExtras];
 
@@ -650,6 +738,20 @@ const Prologue = () => {
 
   const onDesktopContext = (event) => {
     event.preventDefault();
+
+    // 窗口、开始菜单、任务栏都挂在桌面容器里，
+    // 只有空白处和图标区才该弹桌面菜单，否则在邮件/浏览器里右键会串到桌面。
+    const insideIcon = event.target.closest(".arg-prologue-icons");
+    const insideWindow = event.target.closest(
+      ".arg-win-host, .arg-start-menu, .arg-prologue-taskbar, .arg-connecting",
+    );
+    if (insideWindow) {
+      // 在窗口里右键时，顺手收掉可能还开着的桌面菜单。
+      setMenu(null);
+      return;
+    }
+    if (event.target !== desktopRef.current && !insideIcon) return;
+
     setStartOpen(false);
     setSelectedIcon(null);
     setIconMenu(null);
@@ -977,28 +1079,30 @@ const Prologue = () => {
 
       {stage !== "desktop" ? (
         <div className="arg-connecting" data-done={done}>
-          {/* 连接过渡背景直接用锁屏壁纸，
-              这样淡出时下面露出来的就是同一张图，不会闪出主角的桌面。 */}
-          <div
-            className="arg-connecting-wall"
-            style={{ backgroundImage: `url(img/wallpaper/${lock.wallpaper})` }}
-          ></div>
+          {/* 过渡背景直接用目标资产的库区画面，淡出后落到同一张背景上。 */}
+          <div className="arg-connecting-wall">
+            <Plate variant={target === "zhou" ? "night" : "valley"} />
+          </div>
           <div className="arg-connecting-shade"></div>
           <div className="arg-connecting-box">
-            <div className="arg-connecting-title">{prologue.connect.title}</div>
+            <div className="arg-connecting-title">
+              {(prologue.connect.scripts[target] || prologue.connect.scripts.chenmo).title}
+            </div>
             <div className="arg-connecting-address">
-              {prologue.connect.address}
+              {(prologue.connect.scripts[target] || prologue.connect.scripts.chenmo).address}
             </div>
             <div className="arg-connecting-lines">
-              {prologue.connect.lines.slice(0, lineCount).map((line, index) => (
-                <div
-                  key={index}
-                  className="arg-connect-line"
-                  data-warn={line.startsWith("警告") ? "true" : "false"}
-                >
-                  {line}
-                </div>
-              ))}
+              {(prologue.connect.scripts[target] || prologue.connect.scripts.chenmo).lines
+                .slice(0, lineCount)
+                .map((line, index) => (
+                  <div
+                    key={index}
+                    className="arg-connect-line"
+                    data-warn={line.startsWith("警告") ? "true" : "false"}
+                  >
+                    {line}
+                  </div>
+                ))}
               <span className="arg-connect-cursor">▍</span>
             </div>
           </div>

@@ -1,12 +1,10 @@
-import { lock } from "../data/arg/config";
-
-// ARG 固定壁纸。谜题线索藏在文件名里，所以不允许切换。
+// 桌面壁纸。引子有自己的壁纸；远程阶段改由 SVG 库区画面接管。
 const defState = {
   themes: ["dark"],
   wps: 0,
-  src: lock.wallpaper,
-  // 每次进入页面都重新锁定，不把解锁状态写进 localStorage。
-  locked: true,
+  src: "dark/img0.jpg",
+  // 本作没有锁屏：玩家自己的桌面和远程会话都不经过登录界面。
+  locked: false,
   booted: false,
   act: "",
   dir: 0,
@@ -38,7 +36,6 @@ const wallReducer = (state = defState, action) => {
         ...state,
         booted: false,
         dir: -1,
-        locked: true,
         act: "restart",
       };
     case "WALLSHUTDN":
@@ -46,7 +43,6 @@ const wallReducer = (state = defState, action) => {
         ...state,
         booted: false,
         dir: -1,
-        locked: true,
         act: "shutdn",
       };
     // 壁纸与主题切换在 ARG 中一律忽略。

@@ -1,25 +1,42 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
 import { ToolBar } from "../../../utils/general";
 import { ContentBlocks } from "../../../components/arg/ContentBlocks";
-import { diaryMeta, visibleDiaryEntries } from "../../../data/arg";
+import { Plate } from "../../../components/arg/Plates";
+import {
+  contentOf,
+  displayPath,
+  nodeOf,
+} from "../../../data/arg/files";
+import { machines } from "../../../data/arg/config";
 import "./assets/arg-apps.scss";
 
-// 记事本：只渲染已经解锁的日记页。
-// 未解锁的页不会以“上锁”的形式出现，避免把玩家的注意力引到解锁条件上。
+// 记事本：远程资产上的通用只读文本查看器。
+// 打开哪个文件由 state.arg.openFile 决定（{ host, id }），
+// 文件管理器双击、终端 type 都只改这个状态，不自己做渲染。
 export const Notepad = () => {
   const wnapp = useSelector((state) => state.apps.notepad);
-  const progress = useSelector((state) => state.arg);
-  const entries = visibleDiaryEntries(progress);
-  const corrupted = progress.flags && progress.flags.corrupted;
+  const arg = useSelector((state) => state.arg);
+  const openFile = arg.openFile;
+  const flags = arg.flags || {};
 
-  const lineCount = entries.reduce(
-    (sum, entry) =>
-      sum +
-      (entry.blocks ? entry.blocks.length : 0) +
-      (corrupted && entry.corruptedBlocks ? entry.corruptedBlocks.length : 0),
-    0,
+  const hostId = (openFile && openFile.host) || arg.host || "chenmo";
+  const node =
+    openFile && openFile.id ? nodeOf(hostId, openFile.id) : null;
+  const blocks = useMemo(
+    () => (node ? contentOf(node, flags) : null),
+    [node, flags],
   );
+
+  const machine = machines[hostId] || machines.chenmo;
+  const path = node ? displayPath(hostId, node.id) : "";
+
+  const lineCount = blocks
+    ? blocks.reduce((sum, block) => {
+        if (!block.text) return sum;
+        return sum + String(block.text).split("\n").length;
+      }, 0)
+    : 0;
 
   return (
     <div
@@ -37,14 +54,14 @@ export const Notepad = () => {
         app={wnapp.action}
         icon={wnapp.icon}
         size={wnapp.size}
-        name={diaryMeta.title}
+        name="记事本"
       />
 
       <div className="windowScreen flex flex-col" data-dock="true">
         <div className="arg-diary-tabbar">
           <div className="arg-diary-tab" data-active="true">
             <img src="img/icon/notepad.png" alt="" />
-            <span>{diaryMeta.fileName}</span>
+            <span>{node ? node.name : "无标题"}</span>
             <span className="arg-diary-tab-close">×</span>
           </div>
           <div className="arg-diary-tab-add">+</div>
@@ -58,43 +75,44 @@ export const Notepad = () => {
         </div>
 
         <div className="arg-diary-body win11Scroll">
-          {entries.length ? (
+          {node ? (
             <article className="arg-diary-doc">
               <header className="arg-diary-head">
-                <h1>{diaryMeta.title}</h1>
+                <h1>{node.name}</h1>
                 <div className="arg-diary-byline">
-                  {diaryMeta.author} · {diaryMeta.path}
+                  {path} · {machine.hostname}
                 </div>
               </header>
 
-              {entries.map((entry) => (
-                <section key={entry.id} className="arg-diary-entry">
-                  <div className="arg-diary-date">
-                    {corrupted && entry.corruptedDate
-                      ? entry.corruptedDate
-                      : entry.date}
-                  </div>
-                  <h2 className="arg-diary-title">{entry.title}</h2>
-                  <ContentBlocks
-                    blocks={
-                      corrupted && entry.corruptedBlocks
-                        ? entry.corruptedBlocks
-                        : entry.blocks
-                    }
-                  />
-                </section>
-              ))}
+              {node.kind === "photo" && node.plate ? (
+                <div className="arg-photo">
+                  <Plate variant={node.plate} />
+                  <span className="arg-photo-caption">
+                    {node.caption || node.name}
+                  </span>
+                </div>
+              ) : null}
+
+              {blocks ? (
+                <ContentBlocks blocks={blocks} />
+              ) : (
+                <div className="arg-diary-empty">
+                  这个文件没有可显示的文本内容。
+                </div>
+              )}
             </article>
           ) : (
-            <div className="arg-diary-empty">{diaryMeta.emptyText}</div>
+            <div className="arg-diary-empty">
+              没有打开的文件。在文件管理器里双击一个文件。
+            </div>
           )}
         </div>
 
         <div className="arg-diary-status">
-          <span>第 1 行，第 1 列</span>
-          <span>{lineCount} 段</span>
+          <span>{node ? path : "无文件"}</span>
+          <span>{node && node.description ? node.description : ""}</span>
           <span>UTF-8</span>
-          <span>100%</span>
+          <span>{lineCount} 行</span>
         </div>
       </div>
     </div>

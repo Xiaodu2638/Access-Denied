@@ -14,7 +14,7 @@ const deskReducer = (state = defState, action) => {
       var arr = state.apps.filter((x) => x.name != action.payload);
 
       localStorage.setItem(
-        "arg_desktop",
+        "arg_desktop_v2",
         JSON.stringify(arr.map((x) => x.name)),
       );
       return { ...state, apps: arr };
@@ -23,7 +23,7 @@ const deskReducer = (state = defState, action) => {
       arr.push(action.payload);
 
       localStorage.setItem(
-        "arg_desktop",
+        "arg_desktop_v2",
         JSON.stringify(arr.map((x) => x.name)),
       );
       return { ...state, apps: arr };

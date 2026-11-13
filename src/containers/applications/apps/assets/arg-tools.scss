@@ -1,0 +1,267 @@
+// 资产盘点 / 分区修复 / 回收工具共用的小面板样式。
+// 三个工具都是深色，沿用 arg-window.scss 的标题栏。
+
+.arg-tool {
+  --bg1: #202020;
+  --comp-txt: #333;
+  --txt-col: #e6e6e6;
+  --sat-txt: #9a9a9a;
+
+  background: #202020;
+  color: var(--txt-col);
+
+  .windowScreen {
+    background: #202020;
+  }
+}
+
+.arg-tool-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.arg-tool-section {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--sat-txt);
+}
+
+.arg-tool-grid {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--comp-txt);
+  border-radius: 6px;
+  background: #262626;
+}
+
+.arg-tool-row {
+  display: flex;
+  gap: 12px;
+  padding: 8px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 11px;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  span {
+    flex: none;
+    width: 68px;
+    color: var(--sat-txt);
+  }
+
+  b {
+    min-width: 0;
+    overflow: hidden;
+    font-weight: 400;
+    color: var(--txt-col);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.arg-tool-volumes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.arg-tool-volume {
+  padding: 10px 12px;
+  border: 1px solid var(--comp-txt);
+  border-radius: 6px;
+  background: #262626;
+
+  &[data-ok="false"] {
+    border-color: rgba(227, 179, 65, 0.4);
+    background: rgba(227, 179, 65, 0.06);
+  }
+}
+
+.arg-tool-volume-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+}
+
+.arg-tool-volume-drive {
+  flex: none;
+  width: 22px;
+  font-family: "Consolas", "Cascadia Mono", monospace;
+  color: #4cc2ff;
+}
+
+.arg-tool-volume-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.arg-tool-volume-size {
+  flex: none;
+  font-family: "Consolas", "Cascadia Mono", monospace;
+  font-size: 11px;
+  color: var(--sat-txt);
+}
+
+.arg-tool-volume-meta {
+  margin-top: 4px;
+  padding-left: 32px;
+  font-size: 10px;
+  color: var(--sat-txt);
+}
+
+.arg-tool-note {
+  font-size: 11px;
+  line-height: 1.8;
+  color: var(--sat-txt);
+}
+
+.arg-tool-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 6px;
+}
+
+.arg-tool-btn {
+  flex: none;
+  padding: 7px 16px;
+  border: 1px solid var(--comp-txt);
+  border-radius: 4px;
+  background: #2d2d2d;
+  color: var(--txt-col);
+  font-family: inherit;
+  font-size: 11.5px;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: #383838;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  &[data-primary="true"],
+  &.arg-tool-btn-primary {
+    border-color: rgba(76, 194, 255, 0.45);
+    background: rgba(76, 194, 255, 0.12);
+    color: #9fdcff;
+  }
+
+  &.arg-tool-btn-danger {
+    border-color: #b42318;
+    background: rgba(180, 35, 24, 0.16);
+    color: #ff7b72;
+
+    &:hover {
+      background: rgba(180, 35, 24, 0.28);
+    }
+  }
+}
+
+.arg-tool-hint {
+  font-family: "Consolas", "Cascadia Mono", monospace;
+  font-size: 10px;
+  color: var(--sat-txt);
+}
+
+// 回收码输入
+.arg-retire-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.arg-retire-label {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--sat-txt);
+}
+
+.arg-retire-field {
+  display: flex;
+  gap: 10px;
+}
+
+.arg-retire-input {
+  flex: 1;
+  min-width: 0;
+  height: 32px;
+  padding: 0 12px;
+  box-sizing: border-box;
+  border: 1px solid var(--comp-txt);
+  border-radius: 4px;
+  outline: none;
+  background: #17171a;
+  color: var(--txt-col);
+  font-family: "Consolas", "Cascadia Mono", monospace;
+  font-size: 13px;
+  letter-spacing: 4px;
+
+  &:focus {
+    border-color: rgba(76, 194, 255, 0.55);
+  }
+}
+
+.arg-retire-error {
+  font-size: 11px;
+  color: #ff7b72;
+}
+
+.arg-retire-volumes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.arg-retire-volume {
+  padding: 3px 10px;
+  border: 1px solid rgba(255, 123, 114, 0.35);
+  border-radius: 3px;
+  background: rgba(255, 123, 114, 0.08);
+  font-family: "Consolas", "Cascadia Mono", monospace;
+  font-size: 11px;
+  color: #ff9a92;
+}
+
+.arg-retire-running {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 40px 0;
+}
+
+.arg-retire-spinner {
+  width: 28px;
+  height: 28px;
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  border-top-color: #4cc2ff;
+  border-radius: 50%;
+  animation: arg-tool-spin 900ms linear infinite;
+}
+
+@keyframes arg-tool-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.arg-retire-running-text {
+  font-family: "Consolas", "Cascadia Mono", monospace;
+  font-size: 11.5px;
+  letter-spacing: 1px;
+  color: var(--sat-txt);
+}

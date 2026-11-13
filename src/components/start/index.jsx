@@ -290,10 +290,10 @@ export const CalnWid = () => {
         prevnextbutton: "show",
         highlighttoday: true,
         highlighttargetdate: true,
-        // 固定到虚构时间线里的当月，并高亮事故发生的那一天。
+        // 固定到虚构时间线里的当月，并高亮接单当天。
         year: now.getFullYear(),
         month: now.getMonth(),
-        date: Number(timeline.incident.slice(8, 10)),
+        date: Number(timeline.now.slice(8, 10)),
       });
     }
   });

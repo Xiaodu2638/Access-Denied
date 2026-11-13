@@ -1,8 +1,8 @@
 export const gene_name = () =>
   Math.random().toString(36).substring(2, 10).toUpperCase();
 
-// 「未授权访问」只保留六个应用 + 三个系统 action。
-// icon 同时是窗口状态在 state.apps 里的 key。
+// 远程桌面上的应用。icon 同时是窗口状态在 state.apps 里的 key，
+// 也是 public/img/icon/ 下的文件名。
 const apps = [
   {
     name: "Start",
@@ -23,12 +23,6 @@ const apps = [
     action: "WIDGETS",
   },
   {
-    name: "记事本",
-    icon: "notepad",
-    type: "app",
-    action: "NOTEPAD",
-  },
-  {
     name: "文件管理器",
     icon: "explorer",
     type: "app",
@@ -41,22 +35,40 @@ const apps = [
     action: "MSEDGE",
   },
   {
+    name: "记事本",
+    icon: "notepad",
+    type: "app",
+    action: "NOTEPAD",
+  },
+  {
     name: "终端",
     icon: "terminal",
     type: "app",
     action: "TERMINAL",
   },
   {
+    name: "资产盘点",
+    icon: "taskmanager",
+    type: "app",
+    action: "ASSET",
+  },
+  {
+    name: "分区修复",
+    icon: "settings",
+    type: "app",
+    action: "PARTITION",
+  },
+  {
+    name: "回收工具",
+    icon: "security",
+    type: "app",
+    action: "RETIRE",
+  },
+  {
     name: "回收站",
     icon: "bin0",
     type: "app",
     action: "RECYCLE",
-  },
-  {
-    name: "session.js",
-    icon: "code",
-    type: "app",
-    action: "DONTRUN",
   },
 ];
 

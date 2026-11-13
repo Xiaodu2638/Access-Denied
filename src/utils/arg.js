@@ -1,37 +1,21 @@
 import { useEffect } from "react";
-import { lock, timeline } from "../data/arg/config";
+import { timeline } from "../data/arg/config";
 
-// FNV-1a 32bit，用于校验锁屏谜题答案。
-// 只在前端做防剧透，不是真正的安全机制。
-export const fnv1a32 = (input) => {
-  let hash = 0x811c9dc5;
-  for (let i = 0; i < input.length; i++) {
-    hash ^= input.charCodeAt(i);
-    hash = Math.imul(hash, 0x01000193);
-  }
-  return (hash >>> 0).toString(16).padStart(8, "0");
-};
-
-export const verifyLockAnswer = (answer) =>
-  fnv1a32(String(answer || "").trim()) === lock.puzzle.answerHash;
-
-// 虚构时间线里的“现在”。
-// 远程机器被挂起在事故那一刻，所以桌面、任务栏、日历、设置页统一停在
-// 2031-04-19 03:42，不再受真实系统时间影响。
+// 虚构时间线里的“现在”。桌面、任务栏、日历、设置页统一停在
+// 2031-06-15 17:34，不受真实系统时间影响。
 export const argClockDate = () => {
-  const [year, month, day] = timeline.incident
+  const [year, month, day] = timeline.now
     .split(" ")[0]
     .split("-")
     .map(Number);
   const date = new Date();
   date.setFullYear(year, month - 1, day);
-  date.setHours(timeline.desktopClock.hour, timeline.desktopClock.minute, 0, 0);
+  date.setHours(timeline.clock.hour, timeline.clock.minute, 0, 0);
   return date;
 };
 
 // 进度只存在内存里：刷新页面就等于从头开始。
 // 这样玩家每次都能从引子完整走一遍，不会被上一次的进度跳过线索。
-// 仍然保留和原来一致的读写接口，避免改动调用方。
 let memoryProgress = null;
 
 export const loadArgProgress = (defaults) => {
@@ -47,6 +31,15 @@ export const loadArgProgress = (defaults) => {
     notificationsSeen: Array.isArray(memoryProgress.notificationsSeen)
       ? memoryProgress.notificationsSeen
       : defaults.notificationsSeen,
+    handover: Array.isArray(memoryProgress.handover)
+      ? memoryProgress.handover
+      : defaults.handover,
+    chatSeen: Array.isArray(memoryProgress.chatSeen)
+      ? memoryProgress.chatSeen
+      : defaults.chatSeen,
+    readMail: Array.isArray(memoryProgress.readMail)
+      ? memoryProgress.readMail
+      : defaults.readMail,
   };
 };
 

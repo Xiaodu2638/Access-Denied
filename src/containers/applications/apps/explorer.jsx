@@ -1,28 +1,54 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { ToolBar } from "../../../utils/general";
-import { ContentBlocks } from "../../../components/arg/ContentBlocks";
 import { useEscape } from "../../../utils/arg";
 import {
-  canAccess,
-  contentOf,
+  availableChildren,
+  collectFiles,
   displayPath,
-  fileSystem,
+  getHost,
+  handoverReadme,
+  nodeOf,
   pathOf,
-  projectId,
-  projectName,
 } from "../../../data/arg/files";
+import { handoverDrive, machines } from "../../../data/arg/config";
 import "./assets/arg-explorer.scss";
 
-// 文件管理器：linche-agent 项目浏览器。
-// 只读取 src/data/arg/files.js，不在这里写任何剧情文案。
-// 双击文件时按 kind 打开对应应用；其余文件只在右侧只读预览。
+// 文件管理器：远程资产上的 C: / D: / 交接盘 (Z:)。
+// 只读取 src/data/arg/files.js；复制动作写进 state.arg.handover。
+// 隐藏项目开关与 Windows 一致，默认关闭。
 
-const icons = {
+const iconPaths = {
   folder: (
     <>
       <path d="M3 6.5h6.2l1.4 1.6H21v9.4a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5z" />
       <path d="M3 6.5V5.4c0-.8.7-1.4 1.5-1.4h4.2l1.5 1.7H18.5c.8 0 1.5.6 1.5 1.4v.4z" />
+    </>
+  ),
+  drive: (
+    <>
+      <rect x="3" y="6" width="18" height="12" rx="2" />
+      <path d="M3 12h18" />
+      <circle cx="17" cy="15" r="1" />
+    </>
+  ),
+  photo: (
+    <>
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <circle cx="9" cy="10" r="1.6" />
+      <path d="M4.5 17l5-5 3.5 3.5 2.5-2.5 4 4" />
+    </>
+  ),
+  network: (
+    <>
+      <circle cx="12" cy="12" r="8" />
+      <path d="M4 12h16M12 4c3 3 3 13 0 16M12 4c-3 3-3 13 0 16" />
+    </>
+  ),
+  lock: (
+    <>
+      <rect x="5" y="10" width="14" height="10" rx="2" />
+      <path d="M8.5 10V7.5a3.5 3.5 0 0 1 7 0V10" />
     </>
   ),
   doc: (
@@ -31,32 +57,11 @@ const icons = {
       <path d="M14 3v4h4" />
     </>
   ),
-  code: (
-    <>
-      <path d="M6 3h8l4 4v14H6z" />
-      <path d="M14 3v4h4" />
-      <path d="M10.4 12.2 8.6 14l1.8 1.8M13.6 12.2 15.4 14l-1.8 1.8" />
-    </>
-  ),
-  key: (
-    <>
-      <circle cx="8" cy="8" r="3.4" />
-      <path d="m10.4 10.4 8 8M15.6 15.6l1.8-1.8M17.4 17.4l1.8-1.8" />
-    </>
-  ),
-  lock: (
-    <>
-      <rect x="5" y="10" width="14" height="10" rx="1.6" />
-      <path d="M8 10V7.4a4 4 0 0 1 8 0V10" />
-    </>
-  ),
 };
 
-const FileIcon = ({ type, kind, locked, size = 34 }) => (
+const FileIcon = ({ kind = "doc", size = 18 }) => (
   <svg
     className="arg-file-icon"
-    data-type={type}
-    data-kind={kind}
     viewBox="0 0 24 24"
     width={size}
     height={size}
@@ -69,104 +74,211 @@ const FileIcon = ({ type, kind, locked, size = 34 }) => (
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      {icons[locked ? "lock" : kind] || icons[type] || icons.doc}
+      {iconPaths[kind] || iconPaths.doc}
     </g>
   </svg>
 );
 
-const iconKindOf = (node) => {
+const kindOf = (node) => {
+  if (!node) return "doc";
   if (node.type === "folder") return "folder";
-  if (node.kind === "markdown" || node.kind === "json") return "doc";
-  if (node.kind === "javascript") return "code";
-  if (node.kind === "key") return "key";
+  if (node.info && node.info.icon === "drive") return "drive";
+  if (node.kind === "photo") return "photo";
   return "doc";
 };
 
-const sizeLabel = (node) =>
-  node.type === "folder"
-    ? `${node.children.length} 个项目`
-    : node.description || "只读";
+const driveLabel = (node) =>
+  (node.info && node.info.label) || node.name;
 
 const Explorer = () => {
   const wnapp = useSelector((state) => state.apps.explorer);
-  const flags = useSelector((state) => state.arg.flags);
+  const arg = useSelector((state) => state.arg);
   const dispatch = useDispatch();
 
-  // 结局之后仓库被归档，目录内容不再存在。
-  const archived = flags.archived === true;
+  const hostId = arg.host || "chenmo";
+  const host = getHost(hostId);
+  const flags = arg.flags || {};
+  const machine = machines[hostId] || machines.chenmo;
+  const hasHandover = hostId === "chenmo";
 
-  const [cwd, setCwd] = useState(projectId);
-  const [selectedId, setSelectedId] = useState(null);
+  const [loc, setLoc] = useState({ kind: "computer" });
+  const [selected, setSelected] = useState(null);
   const [search, setSearch] = useState("");
-  // 默认关闭，和 Windows 一样：带点的文件不显示。
   const [showHidden, setShowHidden] = useState(false);
+  const [notice, setNotice] = useState("");
 
-  const current = fileSystem.nodes[cwd] || fileSystem.nodes[projectId];
-  const selected = selectedId ? fileSystem.nodes[selectedId] : null;
-
-  // 在文件管理器里读到 .session 也算读过，dump 的最后一行才会出现。
+  // 换一台资产时回到「此电脑」，避免把上一台的路径带过来。
   useEffect(() => {
-    if (!selected || selected.name !== ".session") return;
-    if (flags.readSession === true) return;
-    dispatch({
-      type: "ARG_FLAG",
-      payload: { flag: "readSession", value: true },
+    setLoc({ kind: "computer" });
+    setSelected(null);
+    setSearch("");
+    setNotice("");
+  }, [hostId]);
+
+  useEffect(() => {
+    if (!notice) return undefined;
+    const timer = setTimeout(() => setNotice(""), 3200);
+    return () => clearTimeout(timer);
+  }, [notice]);
+
+  const drives = useMemo(
+    () =>
+      host.roots
+        .map((id) => host.nodes[id])
+        .filter((node) => node)
+        .filter((node) => !node.requires || flags[node.requires]),
+    [host, flags],
+  );
+
+  const currentFolder =
+    loc.kind === "folder" ? nodeOf(hostId, loc.id) : null;
+
+  const children = useMemo(() => {
+    if (loc.kind !== "folder" || !currentFolder) return [];
+    return availableChildren(hostId, loc.id, flags, showHidden);
+  }, [loc, currentFolder, hostId, flags, showHidden]);
+
+  const keyword = search.trim().toLowerCase();
+
+  const filterBySearch = (items) =>
+    keyword ? items.filter((item) => item.name.toLowerCase().includes(keyword)) : items;
+
+  const sortItems = (items) =>
+    [...items].sort((a, b) => {
+      if (a.type !== b.type) return a.type === "folder" ? -1 : 1;
+      return a.name.localeCompare(b.name, "zh-Hans-CN");
     });
-  }, [selected, flags.readSession, dispatch]);
 
-  const items = useMemo(() => {
-    if (!current) return [];
-    const keyword = search.trim().toLowerCase();
+  const zEntries = useMemo(() => arg.handover || [], [arg.handover]);
 
-    // 过早公开之后，仓库目录被归档：内容全部消失。
-    if (archived && current.id === projectId) return [];
+  const selectedNode = useMemo(() => {
+    if (!selected) return null;
+    if (selected.kind === "node") return nodeOf(hostId, selected.id);
+    if (selected.kind === "entry")
+      return nodeOf(selected.entry.host, selected.entry.id);
+    return null;
+  }, [selected, hostId]);
 
-    return current.children
-      .map((id) => fileSystem.nodes[id])
-      .filter((node) => !node.hidden || showHidden)
-      .filter((node) => !keyword || node.name.toLowerCase().includes(keyword))
-      .sort((a, b) => {
-        if (a.type !== b.type) return a.type === "folder" ? -1 : 1;
-        return a.name.localeCompare(b.name, "zh-Hans-CN");
-      });
-  }, [current, search, showHidden, archived]);
-
-  const select = (node) => {
-    if (node) setSelectedId(node.id);
+  const isCopied = (node) => {
+    if (!node) return false;
+    return zEntries.some(
+      (entry) => entry.host === hostId && entry.id === node.id,
+    );
   };
 
-  const enter = (node) => {
-    if (!node || node.type !== "folder") return;
-    if (!canAccess(node, flags)) {
-      setSelectedId(node.id);
+  const openNode = (node, nodeHost = hostId) => {
+    if (!node) return;
+    if (node.type === "folder") {
+      setLoc({ kind: "folder", id: node.id });
+      setSelected(null);
       return;
     }
-    setCwd(node.id);
-    setSelectedId(null);
-  };
-
-  const launch = (node) => {
-    if (!node || node.type !== "file") return;
-    if (node.info && node.info.kind === "diary") {
-      dispatch({ type: "NOTEPAD", payload: "full" });
-    } else if (node.info && node.info.kind === "dontrun") {
-      dispatch({ type: "DONTRUN", payload: "full" });
+    dispatch({
+      type: "ARG_OPEN_FILE",
+      payload: { host: nodeHost, id: node.id },
+    });
+    // 打开即算读过。标记写在数据里，组件不判断文件名。
+    if (node.readFlag) {
+      dispatch({
+        type: "ARG_FLAG",
+        payload: { flag: node.readFlag, value: true },
+      });
     }
+    dispatch({ type: "NOTEPAD", payload: "full" });
   };
 
-  const chain = pathOf(cwd);
-  const locked = selected && !canAccess(selected, flags);
+  const copyNode = (node) => {
+    if (!node || node.type === "drive") return;
+    const files = node.type === "file" ? [node] : collectFiles(hostId, node.id);
+    if (!files.length) {
+      setNotice("没有可复制的文件。");
+      return;
+    }
+    dispatch({
+      type: "ARG_HANDOVER_ADD",
+      payload: files.map((file) => ({
+        host: hostId,
+        id: file.id,
+        name: file.name,
+        path: displayPath(hostId, file.id),
+      })),
+    });
+    setNotice(`${files.length} 个文件已复制到 ${handoverDrive.path}`);
+  };
 
-  // Esc 返回上一级；已经在项目根目录时不做任何事。
+  const removeEntry = (entry) => {
+    dispatch({ type: "ARG_HANDOVER_REMOVE", payload: entry });
+    setNotice("已从交接盘移除。");
+  };
+
+  const chain = useMemo(() => {
+    if (loc.kind === "computer") return [];
+    if (loc.kind === "z") return [];
+    return pathOf(hostId, loc.id);
+  }, [loc, hostId]);
+
   useEscape(!wnapp.hide, () => {
-    if (current && current.parent) {
-      setCwd(current.parent);
-      setSelectedId(null);
+    if (loc.kind === "folder") {
+      const node = nodeOf(hostId, loc.id);
+      if (node && node.parent) setLoc({ kind: "folder", id: node.parent });
+      else setLoc({ kind: "computer" });
+      setSelected(null);
+      return;
+    }
+    if (loc.kind === "z") {
+      setLoc({ kind: "computer" });
+      setSelected(null);
     }
   });
 
-  const previewContent =
-    selected && selected.type === "file" ? contentOf(selected, flags) : null;
+  const up = () => {
+    if (loc.kind === "folder") {
+      const node = nodeOf(hostId, loc.id);
+      if (node && node.parent) setLoc({ kind: "folder", id: node.parent });
+      else setLoc({ kind: "computer" });
+    } else {
+      setLoc({ kind: "computer" });
+    }
+    setSelected(null);
+  };
+
+  const renderItems = () => {
+    if (loc.kind === "computer") {
+      return sortItems(
+        filterBySearch(
+          drives.map((node) => ({ ...node, type: "folder" })),
+        ),
+      );
+    }
+
+    if (loc.kind === "z") {
+      const virtual = [
+        {
+          id: "z-readme",
+          name: handoverReadme.name,
+          type: "file",
+          kind: "txt",
+          description: handoverReadme.description,
+          virtual: "readme",
+        },
+        ...zEntries.map((entry) => ({
+          id: `z:${entry.host}:${entry.id}`,
+          name: entry.name,
+          type: "file",
+          kind:
+            (nodeOf(entry.host, entry.id) || {}).kind || "txt",
+          description: entry.path,
+          virtual: "entry",
+          entry,
+        })),
+      ];
+      return sortItems(filterBySearch(virtual));
+    }
+
+    return sortItems(filterBySearch(children));
+  };
+
+  const items = renderItems();
 
   return (
     <div
@@ -194,42 +306,68 @@ const Explorer = () => {
               type="button"
               className="arg-exp-navbtn"
               aria-label="向上"
-              disabled={!current || !current.parent}
-              onClick={() => {
-                if (current && current.parent) {
-                  setCwd(current.parent);
-                  setSelectedId(null);
-                }
-              }}
+              disabled={loc.kind === "computer"}
+              onClick={up}
             >
               ↑
             </button>
             <button
               type="button"
               className="arg-exp-navbtn"
-              aria-label="回到项目"
+              aria-label="此电脑"
               onClick={() => {
-                setCwd(projectId);
-                setSelectedId(null);
+                setLoc({ kind: "computer" });
+                setSelected(null);
               }}
             >
               ⟳
             </button>
           </div>
 
-          <div className="arg-exp-path" title={displayPath(cwd)}>
-            {chain.map((node, index) => (
-              <React.Fragment key={node.id}>
-                {index > 0 ? <span className="arg-exp-sep">›</span> : null}
+          <div className="arg-exp-path">
+            <button
+              type="button"
+              className="arg-exp-crumb"
+              onClick={() => {
+                setLoc({ kind: "computer" });
+                setSelected(null);
+              }}
+            >
+              此电脑
+            </button>
+            {loc.kind === "z" ? (
+              <>
+                <span className="arg-exp-sep">›</span>
                 <button
                   type="button"
                   className="arg-exp-crumb"
+                  data-active="true"
+                >
+                  {handoverDrive.label}
+                </button>
+                <span className="arg-exp-sep">›</span>
+                <button
+                  type="button"
+                  className="arg-exp-crumb"
+                  data-active="true"
+                >
+                  交接
+                </button>
+              </>
+            ) : null}
+            {chain.map((node, index) => (
+              <React.Fragment key={node.id}>
+                <span className="arg-exp-sep">›</span>
+                <button
+                  type="button"
+                  className="arg-exp-crumb"
+                  data-active={index === chain.length - 1 ? "true" : "false"}
                   onClick={() => {
-                    setCwd(node.id);
-                    setSelectedId(null);
+                    setLoc({ kind: "folder", id: node.id });
+                    setSelected(null);
                   }}
                 >
-                  {index === 0 ? "%user%" : node.name}
+                  {index === 0 ? driveLabel(node) : node.name}
                 </button>
               </React.Fragment>
             ))}
@@ -259,230 +397,253 @@ const Explorer = () => {
 
         <div className="arg-exp-main">
           <aside className="arg-exp-side">
-            <div className="arg-exp-side-title">快速访问</div>
             <button
               type="button"
               className="arg-exp-side-item"
-              data-active={cwd === fileSystem.rootId ? "true" : "false"}
+              data-active={loc.kind === "computer" ? "true" : "false"}
               onClick={() => {
-                setCwd(fileSystem.rootId);
-                setSelectedId(null);
+                setLoc({ kind: "computer" });
+                setSelected(null);
               }}
             >
-              <FileIcon type="folder" size={17} />
-              <span>{fileSystem.nodes[fileSystem.rootId].name}</span>
-            </button>
-            <button
-              type="button"
-              className="arg-exp-side-item"
-              data-active={
-                current && current.name === "Desktop" ? "true" : "false"
-              }
-              onClick={() => {
-                setCwd(`${fileSystem.rootId}/Desktop`);
-                setSelectedId(null);
-              }}
-            >
-              <FileIcon type="folder" size={17} />
-              <span>桌面</span>
-            </button>
-            <button
-              type="button"
-              className="arg-exp-side-item"
-              data-active={
-                current && current.name === "Documents" ? "true" : "false"
-              }
-              onClick={() => {
-                setCwd(`${fileSystem.rootId}/Documents`);
-                setSelectedId(null);
-              }}
-            >
-              <FileIcon type="folder" size={17} />
-              <span>文档</span>
-            </button>
-            <button
-              type="button"
-              className="arg-exp-side-item"
-              data-active={cwd === projectId ? "true" : "false"}
-              onClick={() => {
-                setCwd(projectId);
-                setSelectedId(null);
-              }}
-            >
-              <FileIcon type="folder" size={17} />
-              <span>{projectName}</span>
+              <FileIcon kind="drive" size={15} />
+              <span>此电脑</span>
             </button>
 
-            <div className="arg-exp-side-title">此电脑</div>
-            <div className="arg-exp-side-item" data-disabled="true">
-              <FileIcon type="doc" size={17} />
-              <span>本地磁盘 (C:)</span>
-            </div>
-            <div className="arg-exp-side-item" data-disabled="true">
-              <FileIcon type="doc" size={17} />
-              <span>数据 (D:)</span>
+            {drives.map((node) => (
+              <button
+                key={node.id}
+                type="button"
+                className="arg-exp-side-item"
+                data-active={
+                  loc.kind === "folder" && loc.id === node.id ? "true" : "false"
+                }
+                onClick={() => {
+                  setLoc({ kind: "folder", id: node.id });
+                  setSelected(null);
+                }}
+              >
+                <FileIcon kind="drive" size={15} />
+                <span>{driveLabel(node)}</span>
+              </button>
+            ))}
+
+            {hasHandover ? (
+              <>
+                <div className="arg-exp-side-title">网络位置</div>
+                <button
+                  type="button"
+                  className="arg-exp-side-item"
+                  data-active={loc.kind === "z" ? "true" : "false"}
+                  onClick={() => {
+                    setLoc({ kind: "z" });
+                    setSelected(null);
+                  }}
+                >
+                  <FileIcon kind="network" size={15} />
+                  <span>{handoverDrive.label}</span>
+                </button>
+              </>
+            ) : null}
+
+            <div className="arg-exp-side-host">
+              {machine.hostname} · {machine.user}
             </div>
           </aside>
 
           <section className="arg-exp-files">
-            <div className="arg-exp-grid">
-              {items.map((node) => (
-                <button
-                  key={node.id}
-                  type="button"
-                  className="arg-exp-item"
-                  data-active={selectedId === node.id ? "true" : "false"}
-                  data-locked={
-                    node.locked && !canAccess(node, flags) ? "true" : "false"
-                  }
-                  onClick={() => select(node)}
-                  onDoubleClick={() =>
-                    node.type === "folder" ? enter(node) : launch(node)
-                  }
-                  title={node.name}
-                >
-                  <FileIcon
-                    type={node.type}
-                    kind={iconKindOf(node)}
-                    locked={node.locked && !canAccess(node, flags)}
-                    size={36}
-                  />
-                  <span className="arg-exp-name">{node.name}</span>
-                </button>
-              ))}
-            </div>
+            {items.length ? (
+              <div className="arg-exp-grid">
+                {items.map((item) => {
+                  const virtual = item.virtual;
+                  const node = virtual ? null : item;
+                  const isSelected =
+                    (selected &&
+                      selected.kind === "node" &&
+                      selected.id === item.id) ||
+                    (selected &&
+                      selected.kind === "readme" &&
+                      virtual === "readme") ||
+                    (selected &&
+                      selected.kind === "entry" &&
+                      virtual === "entry" &&
+                      selected.entry.host === item.entry.host &&
+                      selected.entry.id === item.entry.id);
 
-            {items.length === 0 ? (
-              <div className="arg-exp-empty">
-                {archived && current && current.id === projectId
-                  ? "该仓库已被请求归档。所有文件已移出当前会话。"
-                  : "此文件夹为空。"}
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      className="arg-exp-item"
+                      data-selected={isSelected ? "true" : "false"}
+                      title={item.name}
+                      onClick={() => {
+                        if (virtual === "readme") {
+                          setSelected({ kind: "readme" });
+                          return;
+                        }
+                        if (virtual === "entry") {
+                          setSelected({ kind: "entry", entry: item.entry });
+                          return;
+                        }
+                        setSelected({ kind: "node", id: item.id });
+                      }}
+                      onDoubleClick={() => {
+                        if (virtual === "readme") {
+                          setSelected({ kind: "readme" });
+                          return;
+                        }
+                        if (virtual === "entry") {
+                          openNode(
+                            nodeOf(item.entry.host, item.entry.id),
+                            item.entry.host,
+                          );
+                          return;
+                        }
+                        openNode(node);
+                      }}
+                    >
+                      <span
+                        className="arg-exp-item-icon"
+                        data-kind={kindOf(node)}
+                      >
+                        <FileIcon kind={kindOf(node)} size={30} />
+                      </span>
+                      <span className="arg-exp-name">{item.name}</span>
+                      <span className="arg-exp-item-meta">
+                        {virtual === "entry"
+                          ? "已复制"
+                          : item.type === "folder"
+                            ? `${item.children.length} 个项目`
+                            : item.description || ""}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
-            ) : null}
+            ) : (
+              <div className="arg-exp-empty">
+                {loc.kind === "z"
+                  ? "交接盘里还没有文件。"
+                  : "此文件夹为空，或项目已被隐藏。"}
+              </div>
+            )}
+
+            {notice ? <div className="arg-exp-hint">{notice}</div> : null}
 
             <div className="arg-exp-status">
-              <span>{items.length} 个项目</span>
-              <span>{displayPath(cwd)}</span>
+              <span>
+                {loc.kind === "computer"
+                  ? `${drives.length} 个磁盘`
+                  : `${items.length} 个项目`}
+              </span>
+              <span>
+                {loc.kind === "z"
+                  ? handoverDrive.path
+                  : currentFolder
+                    ? displayPath(hostId, currentFolder.id)
+                    : "此电脑"}
+              </span>
             </div>
           </section>
 
-          <aside className="arg-exp-preview">
-            {selected ? (
-              <>
-                <header className="arg-exp-preview-head">
-                  <FileIcon
-                    type={selected.type}
-                    kind={iconKindOf(selected)}
-                    locked={locked}
-                    size={22}
-                  />
-                  <div className="arg-exp-preview-title">
-                    <div>{selected.name}</div>
-                    <div className="arg-exp-preview-meta">
-                      {locked ? "已加密" : sizeLabel(selected)}
-                    </div>
-                  </div>
-                </header>
+          <div className="arg-exp-actions">
+            <span className="arg-exp-actions-name">
+              {selected && selected.kind === "readme"
+                ? handoverReadme.name
+                : selectedNode
+                  ? selectedNode.name
+                  : ""}
+            </span>
 
-                <div className="arg-exp-preview-body win11Scroll">
-                  {locked ? (
-                    <div className="arg-exp-locked">
-                      <FileIcon type="lock" kind="lock" size={30} />
-                      <div>此文件夹已加密。</div>
-                      <div>{selected.description}</div>
-                    </div>
-                  ) : selected.type === "folder" ? (
-                    <div className="arg-exp-folderinfo">
-                      <div className="arg-exp-folderinfo-row">
-                        <span>名称</span>
-                        <b>{selected.name}</b>
-                      </div>
-                      <div className="arg-exp-folderinfo-row">
-                        <span>包含</span>
-                        <b>{selected.children.length} 个项目</b>
-                      </div>
-                      <div className="arg-exp-folderinfo-row">
-                        <span>位置</span>
-                        <b>{displayPath(selected.id)}</b>
-                      </div>
-                      {selected.description ? (
-                        <div className="arg-exp-folderinfo-note">
-                          {selected.description}
-                        </div>
-                      ) : null}
-                      <button
-                        type="button"
-                        className="arg-exp-open-folder"
-                        onClick={() => enter(selected)}
-                      >
-                        打开文件夹
-                      </button>
-                    </div>
-                  ) : previewContent ? (
-                    <div className="arg-exp-doc">
-                      <ContentBlocks blocks={previewContent} />
-                      {selected.info && selected.info.kind === "diary" ? (
-                        <button
-                          type="button"
-                          className="arg-exp-open-file"
-                          onClick={() => launch(selected)}
-                        >
-                          用记事本打开
-                        </button>
-                      ) : null}
-                      {selected.info && selected.info.kind === "dontrun" ? (
-                        <button
-                          type="button"
-                          className="arg-exp-open-file"
-                          onClick={() => launch(selected)}
-                        >
-                          查看脚本
-                        </button>
-                      ) : null}
-                    </div>
-                  ) : (
-                    <div className="arg-exp-doc">
-                      {selected.info && selected.info.kind === "diary" ? (
-                        <>
-                          <div className="arg-exp-hint">文本文件。</div>
-                          <button
-                            type="button"
-                            className="arg-exp-open-file"
-                            onClick={() => launch(selected)}
-                          >
-                            用记事本打开
-                          </button>
-                        </>
-                      ) : null}
-                      {selected.info && selected.info.kind === "dontrun" ? (
-                        <>
-                          <div className="arg-exp-hint">JavaScript。</div>
-                          <button
-                            type="button"
-                            className="arg-exp-open-file"
-                            onClick={() => launch(selected)}
-                          >
-                            查看脚本
-                          </button>
-                        </>
-                      ) : null}
-                      {!selected.info ||
-                      !["diary", "dontrun"].includes(selected.info.kind) ? (
-                        <div className="arg-exp-hint">无预览。</div>
-                      ) : null}
-                    </div>
-                  )}
-                </div>
-              </>
-            ) : (
-              <div className="arg-exp-preview-empty"></div>
-            )}
-          </aside>
+            {selected && selected.kind === "readme" ? (
+              <span className="arg-exp-actions-meta">
+                {handoverReadme.description}
+              </span>
+            ) : null}
+
+            {selectedNode && selected.kind === "node" ? (
+              <span className="arg-exp-actions-meta">
+                {selectedNode.type === "folder"
+                  ? `${selectedNode.children.length} 个项目`
+                  : selectedNode.description || ""}
+              </span>
+            ) : null}
+
+            {selectedNode && selected.kind === "entry" ? (
+              <span className="arg-exp-actions-meta">
+                交接盘 · {displayPath(selected.entry.host, selectedNode.id)}
+              </span>
+            ) : null}
+
+            <div className="arg-exp-actions-btns">
+              {selectedNode &&
+              selectedNode.type === "file" &&
+              selected.kind === "node" ? (
+                <button
+                  type="button"
+                  className="arg-exp-copy"
+                  onClick={() => copyNode(selectedNode)}
+                  disabled={isCopied(selectedNode)}
+                >
+                  {isCopied(selectedNode) ? "已在交接盘" : "复制到交接盘"}
+                </button>
+              ) : null}
+
+              {selectedNode &&
+              selectedNode.type === "folder" &&
+              selected.kind === "node" &&
+              !(selectedNode.info && selectedNode.info.icon === "drive") ? (
+                <button
+                  type="button"
+                  className="arg-exp-copy"
+                  onClick={() => copyNode(selectedNode)}
+                >
+                  复制文件夹到交接盘
+                </button>
+              ) : null}
+
+              {selectedNode &&
+              selectedNode.type === "folder" &&
+              selected.kind === "node" &&
+              selectedNode.info &&
+              selectedNode.info.icon === "drive" ? (
+                <span className="arg-exp-chip">磁盘</span>
+              ) : null}
+
+              {selected && selected.kind === "entry" ? (
+                <button
+                  type="button"
+                  className="arg-exp-copy arg-exp-copy-remove"
+                  onClick={() => removeEntry(selected.entry)}
+                >
+                  从交接盘移除
+                </button>
+              ) : null}
+
+              {selectedNode && selectedNode.type === "file" ? (
+                <button
+                  type="button"
+                  className="arg-exp-open-file"
+                  onClick={() =>
+                    openNode(
+                      selectedNode,
+                      selected.kind === "entry"
+                        ? selected.entry.host
+                        : hostId,
+                    )
+                  }
+                >
+                  打开
+                </button>
+              ) : null}
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-export default Explorer;
 export { Explorer };
+export default Explorer;

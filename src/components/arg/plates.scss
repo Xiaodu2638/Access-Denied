@@ -1,0 +1,62 @@
+// 远程桌面背景与照片查看器共用的 SVG 画面。
+
+.arg-plate {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+// 远程桌面的壁纸：纯黑。
+// 用 fixed 而不是 absolute：桌面容器（.appwrap）本身没有高度，
+// absolute 会量到 0，画面不渲染，露出浏览器默认白底。
+.arg-plate-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  // 壁纸是黑的，但别死黑一片：留一点极淡的库区轮廓当气氛。
+  background: #000;
+  pointer-events: none;
+
+  .arg-plate {
+    width: 100%;
+    height: 100%;
+    opacity: 0.16;
+  }
+}
+
+.arg-plate-shade {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(120% 90% at 50% 0%, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 0.7) 100%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.55));
+}
+
+.arg-photo {
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  background: #0a1218;
+
+  .arg-plate {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+  }
+
+  .arg-photo-caption {
+    position: absolute;
+    left: 12px;
+    bottom: 10px;
+    padding: 3px 8px;
+    border-radius: 3px;
+    background: rgba(0, 0, 0, 0.5);
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    color: #e6edf3;
+  }
+}

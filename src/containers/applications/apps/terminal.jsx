@@ -2,40 +2,103 @@ import React, { useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { ToolBar } from "../../../utils/general";
 import {
-  commands,
+  commandHelp,
+  ipconfigLines,
+  machineOf,
+  promptOf,
   terminalMeta,
   unknownCommand,
-  unlockKey,
 } from "../../../data/arg/terminal";
 import {
-  canAccess,
-  contentOf,
-  fileSystem,
-  projectId,
+  availableChildren,
+  displayPath,
+  getHost,
+  nodeOf,
 } from "../../../data/arg/files";
-import { dumpReady, resolvePage } from "../../../data/arg/browser";
 import "./assets/arg-terminal.scss";
 
-// 终端：命令输出全部来自 src/data/arg/terminal.js，
-// 这里只做输入、历史、滚动和进度标记。
-// 玩家在这里敲过的命令会写进 state.arg.terminalHistory，供结局判断。
+// 终端：远程资产上可选的一条查看路径。
+// 它不解锁任何东西，也不能推进剧情 —— 文件管理器和记事本才是主线。
+// 命令输出全部来自 data/arg/{terminal,files}.js，这里只做解析与滚动。
 
 const toneClass = (tone) =>
   tone ? `arg-term-line arg-term-${tone}` : "arg-term-line";
 
-const welcomeEntries = () =>
-  terminalMeta.welcome.map((line, index) => ({
-    id: `welcome-${index}`,
-    text: line.text,
-    tone: line.tone,
-  }));
+const resolveChild = (hostId, parentId, name) => {
+  const host = getHost(hostId);
+  const node = host.nodes[parentId];
+  if (!node) return null;
+
+  const target = name.trim().replace(/^\.\//, "").replace(/\\+$/, "");
+  if (!target) return null;
+
+  const lower = target.toLowerCase();
+  const children = node.children.map((id) => host.nodes[id]).filter(Boolean);
+
+  return (
+    children.find(
+      (child) =>
+        child.name.toLowerCase() === lower ||
+        child.name.replace(/\.[^.]+$/, "").toLowerCase() === lower,
+    ) || null
+  );
+};
+
+// 支持 dir / type 里的相对路径：a\b 逐层向下。
+const walk = (hostId, startId, input) => {
+  const parts = input
+    .split(/[\\/]+/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  let current = nodeOf(hostId, startId);
+  for (let i = 0; i < parts.length; i++) {
+    if (!current) return null;
+    if (parts[i] === "..") {
+      current = current.parent ? nodeOf(hostId, current.parent) : null;
+      continue;
+    }
+    current = resolveChild(hostId, current.id, parts[i]);
+  }
+  return current;
+};
+
+const blocksToLines = (blocks) => {
+  const lines = [];
+  blocks.forEach((block) => {
+    if (!block || !block.text) return;
+    if (block.type === "h") {
+      lines.push({ text: block.text, tone: "ok" });
+    } else if (block.type === "code") {
+      String(block.text)
+        .split("\n")
+        .forEach((line) => lines.push({ text: line, tone: "dim" }));
+    } else {
+      lines.push({ text: block.text, tone: "text" });
+    }
+  });
+  return lines;
+};
 
 export const WnTerminal = () => {
   const wnapp = useSelector((state) => state.apps.terminal);
-  const flags = useSelector((state) => state.arg.flags);
+  const arg = useSelector((state) => state.arg);
+  const flags = arg.flags || {};
   const dispatch = useDispatch();
 
-  const [entries, setEntries] = useState(welcomeEntries);
+  const hostId = arg.host || "chenmo";
+  const host = getHost(hostId);
+  const machine = machineOf(hostId);
+
+  // cwd 用节点 id，切换盘符时也是同一个文件树里的节点。
+  const [cwdId, setCwdId] = useState(host.rootId);
+  const [entries, setEntries] = useState(() =>
+    terminalMeta.welcome(machine).map((line, index) => ({
+      id: `welcome-${index}`,
+      text: line.text,
+      tone: line.tone,
+    })),
+  );
   const [draft, setDraft] = useState("");
   const [history, setHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
@@ -43,6 +106,21 @@ export const WnTerminal = () => {
   const inputRef = useRef(null);
   const scrollRef = useRef(null);
   const seq = useRef(0);
+
+  // 换一台资产时回到该资产的 C:，并清掉上一台的输出。
+  useEffect(() => {
+    setCwdId(host.rootId);
+    setEntries(
+      terminalMeta.welcome(machine).map((line, index) => ({
+        id: `welcome-${index}`,
+        text: line.text,
+        tone: line.tone,
+      })),
+    );
+    setHistory([]);
+    setHistoryIndex(-1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hostId]);
 
   const push = (list) => {
     if (!list || !list.length) return;
@@ -56,36 +134,8 @@ export const WnTerminal = () => {
     ]);
   };
 
-  const projectNode = fileSystem.nodes[projectId];
-
-  const resolveFile = (name) => {
-    if (!projectNode) return null;
-    const target = name.trim().toLowerCase().replace(/^\.\//, "");
-    if (!target) return null;
-
-    // 先找项目根目录的文件，再找子目录，支持 logs/daemon.log 这样的相对路径。
-    const candidates = [];
-    projectNode.children.forEach((id) => {
-      const node = fileSystem.nodes[id];
-      if (!node) return;
-      candidates.push(node);
-      if (node.type === "folder") {
-        node.children.forEach((childId) => {
-          const child = fileSystem.nodes[childId];
-          if (child) candidates.push(child);
-        });
-      }
-    });
-
-    return (
-      candidates.find((node) => {
-        if (node.type !== "file") return false;
-        if (node.name.toLowerCase() === target) return true;
-        const relative = node.id.slice(projectId.length + 1).toLowerCase();
-        return relative === target;
-      }) || null
-    );
-  };
+  const cwdNode = nodeOf(hostId, cwdId) || nodeOf(hostId, host.rootId);
+  const cwdLabel = cwdNode ? displayPath(hostId, cwdNode.id) : "C:";
 
   const run = (raw) => {
     const cmd = raw.trim();
@@ -93,237 +143,134 @@ export const WnTerminal = () => {
 
     const [head, ...rest] = cmd.split(/\s+/);
     const lower = head.toLowerCase();
-    const arg = rest.join(" ").trim();
+    const argText = rest.join(" ").trim();
 
-    push([{ text: `${terminalMeta.cwd}>${cmd}`, tone: "cmd" }]);
-
+    push([{ text: `${promptOf(machine, cwdLabel)}${cmd}`, tone: "cmd" }]);
     setHistory((prev) => [...prev, cmd].slice(-100));
     setHistoryIndex(-1);
     dispatch({ type: "ARG_TERM_PUSH", payload: cmd });
 
-    // 带子命令的完整命令优先匹配，例如 git log / maintainer --accept。
-    const fullKey = [lower, ...rest.map((part) => part.toLowerCase())].join(
-      " ",
-    );
-    const subKey = `${lower} ${rest[0] ? rest[0].toLowerCase() : ""}`.trim();
-    const def =
-      commands[fullKey] ||
-      commands[cmd.toLowerCase()] ||
-      commands[subKey] ||
-      commands[lower];
-
-    if (!def) {
-      push(unknownCommand(head));
+    if (lower === "help") {
+      push(commandHelp);
       return;
     }
 
-    // 前置条件没满足时，这条命令当作不存在。
-    if (def.requires && flags[def.requires] !== true) {
-      push(unknownCommand(head));
+    if (lower === "whoami") {
+      push([{ text: `${host.name}\\${machine.user}`, tone: "text" }]);
       return;
     }
 
-    // 有些命令的输出会随玩家看过的东西变化，但提示语不解释为什么。
-    // variants 按顺序匹配，第一个 flags 全部为真的分支生效。
-    if (def.variants) {
-      const hit = def.variants.find((variant) =>
-        (variant.flags || []).every((flag) => flags[flag] === true),
-      );
-      if (hit) {
-        push(hit.lines || def.lines || []);
-        return;
-      }
+    if (lower === "hostname") {
+      push([{ text: machine.hostname, tone: "text" }]);
+      return;
     }
 
-    if (def.clear) {
+    if (lower === "ipconfig") {
+      push(ipconfigLines(machine));
+      return;
+    }
+
+    if (lower === "cls") {
       setEntries([]);
       return;
     }
 
-    if (def.close) {
-      push(def.lines);
-      setTimeout(() => dispatch({ type: wnapp.action, payload: "close" }), 400);
+    if (lower === "exit") {
+      dispatch({ type: wnapp.action, payload: "close" });
       return;
     }
 
-    if (lower === "unlock") {
-      if (!arg) {
-        push([{ text: `用法：${def.usage}`, tone: "dim" }]);
+    if (lower === "cd") {
+      if (!argText) {
+        push([{ text: `${cwdLabel}`, tone: "text" }]);
         return;
       }
 
-      if (arg.trim() === unlockKey) {
-        push(def.lines);
-        dispatch({
-          type: "ARG_FLAG",
-          payload: { flag: "unlocked", value: true },
-        });
-      } else {
-        push(def.wrongLines || []);
-      }
-      return;
-    }
-
-    if (lower === "restore") {
-      push(def.lines);
-      dispatch({
-        type: "ARG_FLAG",
-        payload: { flag: "restored", value: true },
-      });
-      return;
-    }
-
-    if (lower === "cat") {
-      if (!arg) {
-        push([{ text: "用法：cat <file>", tone: "dim" }]);
+      if (argText === "..") {
+        const parent = cwdNode && cwdNode.parent ? nodeOf(hostId, cwdNode.parent) : null;
+        if (parent) setCwdId(parent.id);
+        else {
+          // 已经在盘符根：切到下一个盘符根，和 Windows 行为一致。
+          const roots = host.roots;
+          const index = roots.indexOf(cwdNode ? cwdNode.id : host.rootId);
+          setCwdId(roots[(index + 1) % roots.length]);
+        }
         return;
       }
 
-      const node = resolveFile(arg);
+      const next = walk(hostId, cwdNode.id, argText);
+      if (!next || next.type !== "folder") {
+        push([{ text: "系统找不到指定的路径。", tone: "err" }]);
+        return;
+      }
+
+      if (next.requires && flags[next.requires] !== true) {
+        push([{ text: "系统找不到指定的路径。", tone: "err" }]);
+        return;
+      }
+
+      setCwdId(next.id);
+      return;
+    }
+
+    if (lower === "dir" || lower === "ls") {
+      const showHidden = /^(-a|--all|\/a)$/i.test(argText);
+      const children = availableChildren(hostId, cwdNode.id, flags, showHidden);
+
+      push([{ text: ` 驱动器 ${cwdLabel} 中的卷`, tone: "dim" }, { text: "" }]);
+
+      if (!children.length) {
+        push([{ text: "文件不存在。", tone: "dim" }]);
+        return;
+      }
+
+      push(
+        children.map((child) => ({
+          text:
+            child.type === "folder"
+              ? `${child.name.padEnd(28, " ")}<DIR>`
+              : `${child.name.padEnd(28, " ")}${child.description || ""}`,
+          tone: child.type === "folder" ? "text" : "dim",
+        })),
+      );
+      return;
+    }
+
+    if (lower === "type" || lower === "cat") {
+      if (!argText) {
+        push([{ text: `用法：${lower} <文件>`, tone: "dim" }]);
+        return;
+      }
+
+      const node = walk(hostId, cwdNode.id, argText);
       if (!node || node.type !== "file") {
-        push([{ text: "找不到该文件。", tone: "err" }]);
+        push([{ text: "系统找不到指定的文件。", tone: "err" }]);
         return;
       }
 
-      const parent = node.parent ? fileSystem.nodes[node.parent] : null;
-      if (
-        (node.locked && !canAccess(node, flags)) ||
-        (parent && !canAccess(parent, flags))
-      ) {
-        push([{ text: "拒绝访问。", tone: "err" }]);
+      const parent = node.parent ? nodeOf(hostId, node.parent) : null;
+      if (parent && parent.requires && flags[parent.requires] !== true) {
+        push([{ text: "系统找不到指定的文件。", tone: "err" }]);
         return;
       }
 
-      const blocks = contentOf(node, flags);
-
-      if (!blocks) {
+      if (!node.content) {
         push([{ text: "该文件没有可显示的文本。", tone: "dim" }]);
         return;
       }
 
-      const lines = [];
-      blocks.forEach((block) => {
-        if (block.type === "h") {
-          lines.push({ text: block.text, tone: "ok" });
-        } else if (block.type === "code") {
-          String(block.text)
-            .split("\n")
-            .forEach((line) => lines.push({ text: line, tone: "dim" }));
-        } else {
-          lines.push({ text: block.text, tone: "text" });
-        }
-      });
+      push(blocksToLines(node.content));
 
-      push(lines);
-
-      // 读的是 .session：记下这件事，dump 最后一行才会显出来。
-      if (node.name === ".session") {
+      if (node.readFlag) {
         dispatch({
           type: "ARG_FLAG",
-          payload: { flag: "readSession", value: true },
+          payload: { flag: node.readFlag, value: true },
         });
       }
       return;
     }
 
-    if (lower === "ls" || lower === "dir") {
-      if (!projectNode) {
-        push([{ text: "目录不可用。", tone: "err" }]);
-        return;
-      }
-
-      // ls -a / ls --all / dir /a 才列出隐藏项目。
-      const showHidden = /^(-a|--all|\/a)$/i.test(arg);
-
-      push([
-        {
-          text: projectNode.children
-            .map((id) => fileSystem.nodes[id])
-            .filter((node) => showHidden || !node.hidden)
-            .map((node) =>
-              node.type === "folder" ? `${node.name}/` : node.name,
-            )
-            .join("   "),
-          tone: "text",
-        },
-      ]);
-
-      if (!flags.unlocked) {
-        push([
-          {
-            text: "encrypted/       访问被拒绝。",
-            tone: "err",
-          },
-        ]);
-      }
-      return;
-    }
-
-    if (lower === "open") {
-      const page = resolvePage(arg);
-
-      if (!page) {
-        push(def.wrongLines || []);
-        return;
-      }
-
-      push(def.lines);
-      dispatch({ type: "ARG_BROWSER", payload: page });
-      dispatch({ type: "MSEDGE", payload: "full" });
-      return;
-    }
-
-    if (def.lines) push(def.lines);
-
-    if (def.flag) {
-      dispatch({ type: "ARG_FLAG", payload: { flag: def.flag, value: true } });
-    }
-
-    // 某些命令直接通往结局：输出播完再切。
-    if (def.ending) {
-      setTimeout(() => {
-        dispatch({ type: "ARG_ENDING", payload: def.ending });
-      }, 1600);
-    }
-
-    // 提交会话：分片齐了是公开，不齐是被退回。
-    if (def.dynamicEnding === true) {
-      const full = dumpReady(flags);
-      setTimeout(() => {
-        dispatch({
-          type: "ARG_ENDING",
-          payload: full ? "publish" : "premature",
-        });
-      }, 1600);
-    }
-
-    // 命名：需要一个名字，名字会写进锁屏。
-    if (def.dynamicEnding === "named") {
-      // arg 是 "--name foo" 的后半段，剥掉标志本身。
-      const name = arg.replace(/^--name\s*/i, "").trim();
-      if (!name) {
-        push([{ text: `用法：${def.usage}`, tone: "dim" }]);
-        return;
-      }
-
-      push([
-        { text: `identity  ${name}  similarity 0.000`, tone: "ok" },
-        { text: "签名已切换。", tone: "ok" },
-        { text: "此会话不再署名 linche。", tone: "dim" },
-      ]);
-
-      setTimeout(() => {
-        dispatch({
-          type: "ARG_FLAG",
-          payload: { flag: "named", value: true },
-        });
-        dispatch({
-          type: "ARG_LOCK_OVERRIDE",
-          payload: { identity: name },
-        });
-        dispatch({ type: "ARG_ENDING", payload: "named" });
-      }, 1600);
-    }
+    push(unknownCommand(head));
   };
 
   const submit = (event) => {
@@ -404,7 +351,9 @@ export const WnTerminal = () => {
             )}
 
             <form className="arg-term-prompt" onSubmit={submit}>
-              <span className="arg-term-cwd">{terminalMeta.cwd}&gt;</span>
+              <span className="arg-term-cwd">
+                {promptOf(machine, cwdLabel)}
+              </span>
               <input
                 ref={inputRef}
                 className="arg-term-input"

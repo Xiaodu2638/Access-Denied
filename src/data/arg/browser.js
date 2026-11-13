@@ -1,200 +1,275 @@
-// 伪浏览器的内部页面。没有 iframe，也不请求外网。
-// 地址栏只接受这里定义的 address / alias。
-//
-// 这里刻意不用「镜像」「真相」这类给答案起的名字。
-// 10.24.7.31 就是一个没关掉的会话存储，里面躺着一个 dump 文件。
+// 远程机器上的内部网站：院 OA、网页邮件、资产平台、本地新闻。
+// 没有 iframe，也不请求外网；地址栏只接受这里定义的地址与别名。
+
+import { companies, machines, timeline } from "./config";
+import { localNews } from "./endings";
+
+const p = (text) => ({ type: "p", text });
+const h = (text) => ({ type: "h", text });
+const code = (text) => ({ type: "code", text });
 
 export const browserMeta = {
-  title: "浏览器",
-  home: "github",
+  home: "oa",
   notFound: {
     title: "无法访问此页面",
-    blocks: [{ type: "p", text: "这个地址不在当前会话的白名单里。" }],
+    blocks: [p("这个地址不在当前网络的白名单里。")],
   },
 };
 
-export const bookmarks = [
-  { label: "linche-agent", page: "github" },
-  { label: "项目文档", page: "docs" },
-];
+// ---------------------------------------------------------------------------
+// 网页邮件
+// ---------------------------------------------------------------------------
 
-// dump 里被打码的段落。每一段对应玩家在别处做过的一件事。
-// 这里没有计数器，也不写「缺失」：页面上就是一块黑的，补上了就变成正文。
-export const dumpFragments = [
-  { id: "commit", flag: "gitLog" },
-  { id: "members", flag: "unlocked" },
-  { id: "media", flag: "restored" },
-  { id: "clone", flag: "ranScript" },
-  // 最后一行只有当玩家真的读过 .session 才会显出来。
-  { id: "lie", flag: "readSession" },
-];
-
-export const recoveredCount = (flags) => {
-  const f = flags || {};
-  return dumpFragments.filter((item) => f[item.flag] === true).length;
+export const chenmoDraft = {
+  id: "draft-reporter",
+  to: "reporter@hekouwanbao.com",
+  toName: "河口晚报 · 采访部",
+  subject: "石桥库区测绘记录（附件）",
+  // 陈默设过定时，但机器 6 月 12 日就断线了，这个任务没有执行。
+  // 玩家看到的是「没发出去」的草稿，按不按由他自己决定。
+  time: "草稿 · 定时 17:40 未执行",
+  scheduled: timeline.mailScheduled,
+  attachments: [
+    "户表.csv",
+    "学校.txt",
+    "祖坟记录.txt",
+    "照片说明.txt",
+    "录音_0611.txt",
+  ],
+  blocks: [
+    p("张记者："),
+    p(
+      "附件是我在石桥村记的东西。公司在成果表上写库区范围内无永久居民，我签不了这个字。",
+    ),
+    p(
+      "37 户，99 个人，一所小学 11 个学生，后山 14 座祖坟。照片和录音都在附件里。",
+    ),
+    p("如果我没再联系你，东西就按这个发。"),
+    p("陈默"),
+  ],
 };
 
-export const dumpReady = (flags) =>
-  recoveredCount(flags) === dumpFragments.length;
-
-const REDACTED = "████████████████████████████████████";
-
-const line = (flags, flag, text) =>
-  flags && flags[flag] === true ? text : REDACTED;
-
-// 10.24.7.31：一个目录列表，不是一扇门。
-// 没有链接、没有按钮，只有文件名和大小。
-export const listingBlocks = () => [
-  { type: "h", text: "/var/session/" },
+const commonMessages = [
   {
-    type: "code",
-    text: [
-      "0x0342.dump     12.4 MB   2031-04-19 03:42",
-      "index            0.2 KB   2031-04-19 03:42",
-    ].join("\n"),
+    id: "m-liu",
+    from: "刘建国",
+    fromName: "刘建国 · 项目办",
+    subject: "成果表按设计书出",
+    time: "6月9日 16:41",
+    blocks: [
+      p("陈默："),
+      p(
+        "成果表按建设单位给的设计书出，居民点、学校、坟墓都填 0。你手上的外业点交了就行，别在表里加栏目。",
+      ),
+      p("月底要交图，别再拖。"),
+    ],
   },
-  { type: "p", text: "2 个文件。" },
+  {
+    id: "m-system",
+    from: "system@jhch.cn",
+    fromName: "院邮件系统",
+    subject: "6 月成果提交提醒",
+    time: "6月12日 08:00",
+    blocks: [
+      p("测绘二队：石桥库区 1:2000 地形图尚未提交。"),
+      p("请于 2031-06-30 前完成成果归档。"),
+    ],
+  },
 ];
 
-// session dump 本体。缺的部分是黑的，不是待办事项。
-export const dumpBlocks = (flags) => {
-  const f = flags || {};
-
-  return [
-    { type: "h", text: "0x0342.dump" },
-    {
-      type: "code",
-      text: [
-        "session  linche",
-        "target   TERMSRV/10.24.7.31",
-        "state    terminated",
-        "",
-        "03:41:52  rec     linche_final.mp4   48s",
-        "03:42:00  identity clone started",
-        "03:42:03  clone verified  similarity 0.998",
-        "03:42:05  git     4f1c0de  chore(agent): 清理维护者痕迹",
-        "03:42:06  members 7 entries   @linche 处理中",
-        "03:42:07  he is lying",
-      ]
-        .map((row) => {
-          if (row.startsWith("03:41:52")) return line(f, "restored", row);
-          if (row.startsWith("03:42:00")) return line(f, "ranScript", row);
-          if (row.startsWith("03:42:03")) return line(f, "ranScript", row);
-          if (row.startsWith("03:42:05")) return line(f, "gitLog", row);
-          if (row.startsWith("03:42:06")) return line(f, "unlocked", row);
-          if (row.startsWith("03:42:07")) return line(f, "readSession", row);
-          return row;
-        })
-        .join("\n"),
-    },
-    { type: "meta", text: "last write  2031-04-22 09:00:07" },
-  ];
-};
-
-export const pages = {
-  github: {
-    id: "github",
-    address: "github.com/linche/linche-agent",
-    aliases: ["github", "repo"],
-    title: "linche/linche-agent",
-    kind: "web",
-    favicon: "github",
-    blocks: [
-      { type: "h", text: "linche / linche-agent" },
-      { type: "p", text: "Public archive · 最后一次提交 3 天前" },
-      { type: "quote", text: "一个会自己维护开源仓库的 agent。" },
+export const mailboxes = {
+  chenmo: {
+    account: "chenmo@jhch.cn",
+    label: "院邮件系统",
+    messages: [
+      ...commonMessages,
       {
-        type: "code",
-        text: [
-          "4f1c0de  chore(agent): 清理维护者痕迹        03:42",
-          "9a02b11  fix(agent): 修复自我复制时的身份冲突",
-          "1d8e3f0  feat(agent): 在 03:42 生成代理会话",
-        ].join("\n"),
-      },
-      {
-        type: "p",
-        text: "仓库已被归档。协作者列表为空。最近一次 issue 由 @unknown 提交，内容是：“他还在吗？”",
+        id: "m-zhou",
+        from: "zhouning@jhch.cn",
+        fromName: "周宁",
+        subject: "复核记录我放你机器上了",
+        time: "6月10日 09:12",
+        blocks: [
+          p("陈默："),
+          p("我又跟镇里进了一次村，数出来和你说的一样。37 户，11 个学生，14 座坟。"),
+          p("我把复核记录放在你机器的文档里了。成果表我不签，已经跟队里说了。"),
+          p("你自己小心。"),
+        ],
       },
     ],
-    links: [{ label: "阅读项目文档", page: "docs" }],
+    draft: chenmoDraft,
   },
-
-  docs: {
-    id: "docs",
-    address: "linche.dev/agent/docs",
-    aliases: ["docs", "documentation"],
-    title: "linche-agent · 文档",
-    kind: "web",
-    favicon: "docs",
-    blocks: [
-      { type: "h", text: "安装" },
-      { type: "code", text: "npm install linche-agent" },
-      { type: "h", text: "配置" },
+  zhou: {
+    account: "zhouning@jhch.cn",
+    label: "院邮件系统",
+    messages: [
       {
-        type: "code",
-        text: [
-          "{",
-          '  "target": "./repo",',
-          '  "window": "03:42",',
-          '  "selfPreserve": true',
-          "}",
-        ].join("\n"),
+        id: "m-chen",
+        from: "chenmo@jhch.cn",
+        fromName: "陈默",
+        subject: "最后一条",
+        time: "6月12日 17:42",
+        blocks: [
+          p("周宁："),
+          p(
+            "如果明天我没来，别找我。我的东西在 D 盘，你看得到就拿走，看不到就算了。",
+          ),
+          p("你签不签是你的事，别把自己搭进去。"),
+        ],
       },
-      {
-        type: "p",
-        text: "window 为低负载时段，格式 HH:MM。默认为 03:42。改这个值不会改变调度周期。",
-      },
-      { type: "h", text: "selfPreserve" },
-      {
-        type: "p",
-        text: "开启后，agent 在维护者不可用时保留当前工作副本。关闭后，未提交的改动会在下一个窗口被丢弃。",
-      },
-      {
-        type: "code",
-        text: "npm run agent -- --target ./repo --window 03:42",
-      },
-      {
-        type: "p",
-        text: "文档更新于 2031-04-19 03:41 · linche",
-      },
+      ...commonMessages,
     ],
-    links: [{ label: "返回仓库", page: "github" }],
-  },
-
-  store: {
-    id: "store",
-    address: "10.24.7.31",
-    aliases: ["store", "10.24.7.31"],
-    title: "10.24.7.31",
-    kind: "store",
-    favicon: "warning",
-    dynamic: "listing",
-    // 没有 links。这里只列出文件，进不进得去靠玩家自己敲路径。
-  },
-
-  dump: {
-    id: "dump",
-    address: "file:///var/session/0x0342.dump",
-    aliases: ["0x0342.dump"],
-    title: "0x0342.dump",
-    kind: "dump",
-    favicon: "warning",
-    dynamic: "dump",
-    ending: true,
+    draft: null,
   },
 };
 
-// 地址栏输入解析：支持完整地址、id、alias。
-export const resolvePage = (input) => {
-  const value = (input || "").trim().toLowerCase();
-  if (!value) return null;
-
-  const ids = Object.keys(pages);
-  for (const id of ids) {
-    const page = pages[id];
-    if (page.address.toLowerCase() === value) return id;
-    if (page.aliases && page.aliases.includes(value)) return id;
-  }
-
-  return null;
+export const draftState = (progress) => {
+  const flags = (progress && progress.flags) || {};
+  if (flags.mailSent) return "sent";
+  if (flags.mailDiscarded) return "discarded";
+  if (flags.mailDestroyed) return "destroyed";
+  return "draft";
 };
+
+// ---------------------------------------------------------------------------
+// 页面
+// ---------------------------------------------------------------------------
+
+const oaPage = {
+  id: "oa",
+  address: "oa.jhch.cn",
+  title: "江河测绘院 · 协同办公",
+  links: [
+    { label: "院邮件", page: "mail" },
+    { label: "资产平台", page: "asset" },
+    { label: "本地新闻", page: "news" },
+  ],
+  blocks: [
+    h("通知公告"),
+    p("关于开展 2031 年“安全生产月”活动的通知"),
+    p("关于石桥水利枢纽库区地形测绘成果提交的通知"),
+    p("测绘二队外业记录回收情况（第 23 周）"),
+    h("项目动态"),
+    p(
+      "石桥库区 1:2000 地形图：控制点复测完成，成果编制中，计划 6 月底交付。",
+    ),
+    p("库区实物指标复核：由建设单位另行组织。"),
+    h("待办"),
+    p("成果表签字：测绘二队 2 人未签。"),
+    p("外业记录：CM-07 未交回。"),
+  ],
+};
+
+const newsPage = (progress) => ({
+  id: "news",
+  address: "news.hekou.local",
+  title: "河口晚报 · 本地",
+  // 远程机器上的这份只是当天的本地版，稿子还没发。
+  blocks: [
+    h("今日要闻"),
+    p("城区三处积水点完成改造。"),
+    p("石桥水利枢纽下闸蓄水进入倒计时，库区周边道路将实施临时管制。"),
+    p("本地招聘会本周三在体育馆举行。"),
+    h("分类广告"),
+    p("出租：建设路两室一厅，家电齐全。"),
+    p("招聘：测绘外业辅助，能吃苦。"),
+  ],
+});
+
+const assetPage = (hostId) => {
+  const machine = machines[hostId] || machines.chenmo;
+  const zhou = hostId === "zhou";
+
+  return {
+    id: "asset",
+    address: "asset.yuntu.data",
+    title: "云图资产平台",
+    blocks: [
+      h("资产详情"),
+      code(
+        [
+          `资产编号   ${machine.hostname}`,
+          `使用人     ${machine.owner}`,
+          `部门       ${machine.role}`,
+          `存放地点   ${machine.site}`,
+          `当前状态   ${zhou ? "在用" : "待回收"}`,
+          `最后上报   ${zhou ? "2031-06-13 09:12" : "2031-06-12 17:40"}`,
+        ].join("\n"),
+      ),
+      h("登记磁盘"),
+      code(
+        zhou
+          ? ["C:   256 GB   系统", "D:    64 GB   数据"].join("\n")
+          : ["C:   118 GB   系统", "登记分区   无"].join("\n"),
+      ),
+      zhou
+        ? p("本资产未分配回收任务。")
+        : p("回收窗口：2031-06-15 18:00 前。"),
+    ],
+  };
+};
+
+const mailPage = (hostId) => ({
+  id: "mail",
+  address: "mail.jhch.cn",
+  title: mailboxes[hostId] ? mailboxes[hostId].label : "院邮件系统",
+  kind: "mail",
+  blocks: [],
+});
+
+export const pagesFor = (hostId, progress) => {
+  const id = hostId || "chenmo";
+  return {
+    oa: oaPage,
+    mail: mailPage(id),
+    news: newsPage(progress),
+    asset: assetPage(id),
+  };
+};
+
+const normalizeAddress = (value) =>
+  String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/^https?:\/\//, "")
+    .replace(/\/.*$/, "");
+
+export const resolvePage = (hostId, progress, input) => {
+  const pages = pagesFor(hostId, progress);
+  const value = normalizeAddress(input);
+  if (!value) return pages[browserMeta.home];
+
+  if (pages[value]) return pages[value];
+
+  return (
+    Object.keys(pages)
+      .map((key) => pages[key])
+      .find((page) => normalizeAddress(page.address) === value) || null
+  );
+};
+
+// 本机浏览器只看得到新闻页。
+export const localNewsPage = (progress) => {
+  const news = localNews(progress);
+  return {
+    id: "news",
+    address: "news.hekou.local",
+    title: news.title,
+    byline: news.byline,
+    blocks: news.blocks,
+  };
+};
+
+export const localPortalPage = {
+  id: "portal",
+  address: "portal.local",
+  title: "新标签页",
+  links: [{ label: "河口晚报", page: "news" }],
+  recent: [
+    { label: "河口晚报 · 本地", page: "news" },
+    { label: "市政务服务平台", page: "portal" },
+    { label: "天气预报", page: "portal" },
+  ],
+};
+
+export const companyLine = `${companies.vendor} · 资产组`;

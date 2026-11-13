@@ -5,6 +5,10 @@
   font-size: 14px;
   line-height: 1.85;
   color: var(--arg-fg, inherit);
+  // 正文可以被选中复制。桌面外壳的 user-select: none 只挡 UI，
+  // 不该把文档内容也锁住。
+  user-select: text;
+  -webkit-user-select: text;
 
   .arg-block-p {
     margin: 0 0 12px;
@@ -46,14 +50,14 @@
   }
 
   // 可复制的代码块容器。
-  // 单行短值（IP、密钥、命令）做成 chip：紧凑、可点击、右侧浮出复制按钮。
-  // 多行内容保持块状，复制按钮固定在右上角。
+  // 正文可以被选中（user-select: text），复制按钮在右上角/右侧浮出。
+  // 点正文不触发复制。
   .arg-code-wrap {
     position: relative;
     margin: 14px 0;
 
     .arg-block-code {
-      cursor: pointer;
+      cursor: text;
       border: 1px solid transparent;
       transition:
         border-color 160ms ease,
@@ -97,12 +101,11 @@
       color: var(--arg-accent, #4cc2ff);
     }
 
-    // 单行：紧凑 chip，右侧留出按钮位置，整段可一次性选中。
+    // 单行：紧凑 chip，右侧留出按钮位置。允许自由选中（不强制全选）。
     &[data-multiline="false"] .arg-block-code {
       display: inline-block;
       padding-right: 62px;
       letter-spacing: 0.3px;
-      user-select: all;
     }
 
     &[data-multiline="false"] .arg-code-copy {

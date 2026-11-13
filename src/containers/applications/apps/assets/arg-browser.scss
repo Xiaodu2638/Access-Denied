@@ -396,3 +396,303 @@
     padding: 12px 18px;
   }
 }
+
+// ---------------------------------------------------------------------------
+// 网页邮箱
+// ---------------------------------------------------------------------------
+
+.arg-browser-view[data-kind="mail"] {
+  display: flex;
+  overflow: hidden;
+}
+
+.arg-webmail {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.arg-webmail-side {
+  flex: none;
+  width: 152px;
+  padding: 12px 8px;
+  border-right: 1px solid var(--arg-web-line);
+  background: #1a1a1d;
+}
+
+.arg-webmail-account {
+  padding: 0 8px 10px;
+  overflow: hidden;
+  font-family: "Consolas", "Cascadia Mono", monospace;
+  font-size: 10px;
+  color: var(--arg-web-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.arg-webmail-folder {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  color: var(--arg-web-fg);
+  cursor: default;
+
+  &[data-active="true"] {
+    background: rgba(76, 194, 255, 0.14);
+    color: var(--arg-web-accent);
+  }
+
+  &:hover:not([data-active="true"]) {
+    background: rgba(255, 255, 255, 0.05);
+  }
+}
+
+.arg-webmail-count {
+  margin-left: auto;
+  padding: 0 5px;
+  border-radius: 8px;
+  background: rgba(227, 179, 65, 0.18);
+  font-size: 9px;
+  color: #e3b341;
+}
+
+.arg-webmail-list {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  width: 232px;
+  overflow-y: auto;
+  border-right: 1px solid var(--arg-web-line);
+  background: #1c1c20;
+}
+
+.arg-webmail-item {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  &[data-active="true"] {
+    background: rgba(76, 194, 255, 0.1);
+  }
+}
+
+.arg-webmail-item-top {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.arg-webmail-from {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 11px;
+  color: var(--arg-web-fg);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.arg-webmail-time {
+  flex: none;
+  font-size: 9.5px;
+  color: var(--arg-web-muted);
+}
+
+.arg-webmail-subject {
+  margin-top: 3px;
+  overflow: hidden;
+  font-size: 10.5px;
+  color: var(--arg-web-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.arg-webmail-read {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--arg-web-bg);
+}
+
+.arg-webmail-head {
+  flex: none;
+  padding: 18px 24px 14px;
+  border-bottom: 1px solid var(--arg-web-line);
+
+  h2 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--arg-web-fg);
+  }
+}
+
+.arg-webmail-meta {
+  margin-top: 6px;
+  font-size: 10.5px;
+  color: var(--arg-web-muted);
+}
+
+.arg-webmail-body {
+  flex: 1;
+  min-height: 0;
+  padding: 20px 24px 28px;
+  overflow-y: auto;
+
+  --arg-fg: #d6d6d6;
+  --arg-fg-strong: #f4f4f4;
+  --arg-muted: #9a9a9a;
+  --arg-code-bg: #141417;
+  --arg-code-fg: #c9d1d9;
+  --arg-accent: #4cc2ff;
+  --arg-code-border: rgba(255, 255, 255, 0.14);
+  --arg-code-btn-bg: rgba(255, 255, 255, 0.1);
+  --arg-code-btn-fg: #9a9a9a;
+  --arg-hint-bg: rgba(227, 179, 65, 0.1);
+  --arg-hint-fg: #e3b341;
+
+  .arg-blocks {
+    font-size: 12.5px;
+    line-height: 1.95;
+  }
+}
+
+.arg-webmail-attach {
+  margin-top: 20px;
+  padding-top: 14px;
+  border-top: 1px solid var(--arg-web-line);
+}
+
+.arg-webmail-attach-title {
+  margin-bottom: 8px;
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--arg-web-muted);
+}
+
+.arg-webmail-attach-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.arg-webmail-attach-item {
+  padding: 3px 9px;
+  border: 1px solid var(--arg-web-line);
+  border-radius: 3px;
+  font-family: "Consolas", "Cascadia Mono", monospace;
+  font-size: 10px;
+  color: var(--arg-web-fg);
+}
+
+// 草稿与发送状态
+.arg-mail-draft {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 24px;
+  border-bottom: 1px solid var(--arg-web-line);
+  background: rgba(227, 179, 65, 0.07);
+  font-size: 11px;
+
+  &[data-state="sent"] {
+    background: rgba(126, 231, 135, 0.08);
+  }
+
+  &[data-state="destroyed"],
+  &[data-state="discarded"] {
+    background: rgba(255, 255, 255, 0.04);
+  }
+}
+
+.arg-mail-draft-label {
+  flex: none;
+  padding: 1px 7px;
+  border-radius: 3px;
+  background: rgba(227, 179, 65, 0.16);
+  font-size: 9.5px;
+  letter-spacing: 1px;
+  color: #e3b341;
+
+  [data-state="sent"] & {
+    background: rgba(126, 231, 135, 0.16);
+    color: #7ee787;
+  }
+
+  [data-state="destroyed"] &,
+  [data-state="discarded"] & {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--arg-web-muted);
+  }
+}
+
+.arg-mail-draft-text {
+  color: var(--arg-web-fg);
+}
+
+.arg-mail-draft-actions {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+
+  button {
+    padding: 4px 12px;
+    border: 1px solid var(--arg-web-line);
+    border-radius: 4px;
+    background: #2a2a2f;
+    color: var(--arg-web-fg);
+    font-family: inherit;
+    font-size: 10.5px;
+    cursor: pointer;
+
+    &:hover {
+      border-color: rgba(76, 194, 255, 0.4);
+      background: rgba(76, 194, 255, 0.12);
+    }
+  }
+
+  .arg-mail-draft-ghost {
+    background: transparent;
+    color: var(--arg-web-muted);
+
+    &:hover {
+      border-color: var(--arg-web-line);
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--arg-web-fg);
+    }
+  }
+}
+
+@media (max-width: 820px) {
+  .arg-webmail-side {
+    display: none;
+  }
+
+  .arg-webmail-list {
+    width: 168px;
+  }
+
+  .arg-webmail-head,
+  .arg-webmail-body,
+  .arg-mail-draft {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}

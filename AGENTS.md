@@ -4,6 +4,8 @@
 React 18 + Redux（`createStore`，无 middleware）+ Vite 3 + Sass；`src-tauri/` 是可选的桌面打包壳。
 无后端，所有状态在前端；不要为剧情引入重型依赖或外部服务。
 
+故事是《石桥》：玩家是接单的 IT 外包，去石桥库区回收一台测绘工作站。
+
 ## Commands
 
 `node` 通常不在 PATH 上。仓库自带便携版 Node（`.tools/node-v22.23.4-win-x64`，被 gitignore，只在本机）：
@@ -30,48 +32,65 @@ push 到 `main` 会触发 `.github/workflows/deploy.yml`，以 `VITE_BASE=/<repo
 
 ## 内容与代码的边界
 
-剧情文案、文件名、终端输出、结局全部在 `src/data/arg/*.js`，统一从 `src/data/arg/index.js` 导出
-（新增数据文件要加一行 `export *`）。组件不硬编码剧情 —— 改文案只动数据层。
+剧情文案、文件名、终端输出、网页、邮件、聊天全部在 `src/data/arg/*.js`，统一从
+`src/data/arg/index.js` 导出（新增数据文件要加一行 `export *`）。组件不硬编码剧情 —— 改文案只动数据层。
 
-新增进度标记时同步改 `createDefaultProgress()`（`src/data/arg/index.js`）；
-`isUnlocked()` / `visibleDiaryEntries()` / `collectTrail()` 都按 flag 名取内容。
+- `config.js` — 品牌、时间线、机器表、回收码、shell 列表、交接盘
+- `files.js` — 双主机文件树（含官方/私人标记、`requires`、`hidden`、`plate`、`readFlag`）
+  与 `getHost / nodeOf / availableChildren / pathOf / displayPath / contentOf / collectFiles`
+- `prologue.js` — 玩家本机的桌面图标、本地文件夹、邮件、RDP 机器列表
+- `browser.js` — 院 OA、网页邮箱（含定时草稿）、资产平台、本地新闻
+- `remote.js` — 调度聊天、资产盘点、分区、回收工具文案、回收站录音
+- `endings.js` — `outcomeOf()`、回执邮件、本机新闻稿
+- `notifications.js` / `terminal.js` — 通知与终端文案
+
+新增进度标记时同步改 `createDefaultProgress()`（`src/data/arg/index.js`）。
 
 进度只能通过 `ARG_*` action 改（`src/reducers/arg.js`）。不要给组件加本地进度 state，
 否则刷新和结局判定会不同步。
 
 ## 叙事约束
 
-- 不写提示、不写指令式文案；线索只能靠玩家主动发现，且不能藏在它自己要打开的那把锁后面。
+- 不写提示、不写指令式文案；线索只能靠玩家主动发现。
 - 通知只陈述真实状态，不做引导。
-- 结局在桌面里发生，由 `endings.js` 的 `steps` 改桌面/锁屏，不要用文字总结面板。
-- `session.js` 只能放在 `linche-agent` 仓库里，不要加到主角桌面。
-- 锁屏不解释谜题、不泄露答案。
+- 结局在桌面里发生：擦除后窗口收起、回到玩家本机、回执在收件箱里。不要用文字总结面板。
+- 玩家是外包，不是测绘员，也不是调查者。终端只是可选的查看方式，不承担解谜。
+- 普通文件操作和邮件操作本身就是选择（复制到 Z: / 发送 / 取消 / 直接回收 / 断开）。
 
 ## 不要"修"的设计
 
 - 进度只存在 `src/utils/arg.js` 的模块级变量里，刷新即从引子重开。
   `ARG_STORAGE_KEY` 只是历史命名，**刻意不写 localStorage**；不要加持久化。
-- RDP 凭据框和锁屏都用 `fnv1a32` 比对 `config.js` 的 `puzzle.answerHash`；
-  终端 `unlock` 用的是另一个密钥（`terminal.js` 的 `unlockKey`）。两者故意不同，别合并。
-- `rdpAuthed` 为真时锁屏只做交接、不再问密码（`containers/background/index.jsx`）；
-  `postEnding` 为真时故意不再自动解锁。这是剧情，不是 bug。
+- `arg.phase` 是 `prologue | remote | aftermath`，只有这三个值。
+- 四种结果由 `outcomeOf()` 从实际状态推出，**没有选择菜单**：
+  `official`（只交正式成果）、`private`（交接盘里有 `private` 文件）、
+  `empty`（回收了但没交文件）、`unrecovered`（没跑回收就断开）。
+- 离开 `remote` 会销毁未发送的草稿（`ARG_PHASE` 里写 `mailDestroyed`）。已发送的不受影响。
+- 定时邮件使用真实倒计时，时长是 `timeline.mailWindowMinutes`。
+- RDP 密码与回收码是不同的东西，都只做字符串比对，没有任何哈希或谜题。
+- 本机与远程是两台机器：`Prologue` 是玩家本机，`state.apps` + 真实桌面是远程机。
 
 ## 结构要点
 
-`src/App.jsx` 按 `state.arg` 叠三层覆盖层：`!flags.prologueSeen` → `Prologue`（完整假桌面，覆盖真实 UI），
-`flags.prologueSeen && booted && !locked && !ending` → `ArgNotification`，`arg.ending` → `Ending`。
+`src/App.jsx` 按 `arg.phase` 渲染：`phase !== "remote"` → `Prologue`（玩家本机，覆盖真实 UI）；
+`phase === "remote"` → `ArgNotification` + `RemoteLayer`（连接栏、调度聊天、邮件倒计时）。
+
+`RemoteLayer.jsx` 负责断开与定时邮件的到点发送。`ArgNotification.jsx` 只在
+`phase === "remote" && host` 时排期。
 
 引子有自己的一套 shell：任务栏、开始菜单、窗口拖动/吸附/层级全在 `src/components/arg/Prologue.jsx`，
 窗口内容在 `PrologueWindows.jsx`。改引子不要去动 `src/components/start` / `src/components/taskbar`
-—— 那是通关后的真实桌面。引子不经过 `state.apps`。
+—— 那是远程桌面/通关后的真实桌面。引子不经过 `state.apps`。
 
 真实桌面应用由 `state.apps` 驱动，**key 是图标文件名**（`defState[allApps[i].icon]`），
-组件里写死 `useSelector((s) => s.apps.notepad)` / `s.apps.bin0` / `s.apps.code`。
+组件里写死 `useSelector((s) => s.apps.explorer)` / `s.apps.notepad` / `s.apps.bin0` /
+`s.apps.taskmanager`（资产盘点）/ `s.apps.settings`（分区修复）/ `s.apps.security`（回收工具）。
 改 `src/utils/apps.js` 的 `icon` 必须同步改所有 selector 和 `public/img/icon/` 文件名，否则窗口永远打不开。
-`src/reducers/apps.js` 顶部把所有应用默认设成浮动窗口（`min(820px, 82vw)` × `min(560px, 72vh)`）。
+`src/reducers/apps.js` 顶部把所有应用默认设成浮动窗口（`min(820px, 82vw)` × `min(560px, 72vh)`），
+并提供 `APPS_HIDE_ALL` 用于切换资产 / 断开时收起窗口。
 
 `data-action`：全大写直接进 redux（匹配 app 的 `action`，如 `NOTEPAD` / `MSEDGE` / `TERMINAL` /
-`RECYCLE` / `DONTRUN`）；混合大小写会被当成 `src/actions/index.js` 里的函数名调用。
+`RECYCLE` / `ASSET` / `PARTITION` / `RETIRE`）；混合大小写会被当成 `src/actions/index.js` 里的函数名调用。
 只有两处实现这条规则 —— 上下文菜单 `src/components/menu/index.jsx` 和任务栏/开始菜单
 `src/components/start/index.jsx`。新增应用要同时给 `utils/apps.js` 条目和
 `containers/applications/index.jsx` 的 `export *`。
@@ -82,8 +101,18 @@ push 到 `main` 会触发 `.github/workflows/deploy.yml`，以 `VITE_BASE=/<repo
 JSX/SCSS 里写死的图片路径必须是相对形式（`img/icon/x.png`），`/img/...` 不会经过 Vite 重写，
 部署到子路径会 404。图标在 `public/img/icon/<id>.png`（多数 64×64）。
 
-文件管理器读 `src/data/arg/files.js` 归一化后的 `fileSystem`。
-`locked: true` + `unlockFlag` 的目录在 `canAccess()` 通过前不显示内容（目录本身仍显示）；
-`hidden: true` 的节点默认不出现，文件管理器要开「显示隐藏项目」，终端要 `ls -a`。
+没有美术素材。照片与远程桌面壁纸都是内联 SVG（`src/components/arg/Plates.jsx`：
+`valley / school / flooded / night / default`）。不要新增图片、音频、视频文件。
 
-`public/arg/linche.mp4` 没有提供，回收站会降级成字幕/占位，不是播放器坏了。
+文件管理器读 `src/data/arg/files.js` 归一化后的 `fileSystem`。
+`data` 里写在 `C:` 下面的盘符节点（如 `D:`）会被 `buildHost` 提升为同级根节点，
+所以路径是 `D:\我的测绘`，不是 `C:\D:\我的测绘`。
+
+- `requires: "partitionMounted"` 的节点在分区修复前不出现（D: 整个不显示）。
+- `hidden: true` 的节点默认不出现，文件管理器要开「显示隐藏项目」，终端要 `dir /a`。
+- `private: true` 决定 `outcomeOf()` 是否判为私人交接。
+- `readFlag` 是打开该文件时点亮的进度标记，组件不按文件名判断。
+
+`Z:` 只在 `hostId === "chenmo"` 时出现，内容是 `handoverReadme` + `arg.handover`。
+
+`public/arg/linche.mp4` 不存在，也不要用；回收站已改成转录播放器（无音频文件）。

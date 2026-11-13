@@ -3,7 +3,6 @@ import { ErrorBoundary } from "react-error-boundary";
 import { useDispatch, useSelector } from "react-redux";
 import "./i18nextConf";
 import "./index.css";
-
 import ActMenu from "./components/menu";
 import {
   BandPane,
@@ -15,11 +14,12 @@ import {
 } from "./components/start";
 import Taskbar from "./components/taskbar";
 import Prologue from "./components/arg/Prologue";
-import Ending from "./components/arg/Ending";
 import ArgNotification from "./components/arg/ArgNotification";
-import { Background, BootScreen, LockScreen } from "./containers/background";
+import RemoteLayer from "./components/arg/RemoteLayer";
+import { Background, BootScreen } from "./containers/background";
 
 import { loadSettings } from "./actions";
+import { installSoundUnlock } from "./utils/sound";
 import * as Applications from "./containers/applications";
 
 function ErrorFallback({ error, resetErrorBoundary }) {
@@ -138,11 +138,13 @@ function App() {
     }
   });
 
+  // 提示音要先有一次用户手势才能解锁，否则定时通知是静音的。
+  useEffect(() => installSoundUnlock(), []);
+
   return (
     <div className="App">
       <ErrorBoundary FallbackComponent={ErrorFallback}>
         {!wall.booted ? <BootScreen dir={wall.dir} /> : null}
-        {wall.locked ? <LockScreen dir={wall.dir} /> : null}
         <div className="appwrap">
           <Background />
           <div className="desktop" data-menu="desk">
@@ -160,14 +162,10 @@ function App() {
           <Taskbar />
           <ActMenu />
         </div>
-        {!arg.flags.prologueSeen ? <Prologue /> : null}
-        {arg.flags.prologueSeen &&
-        wall.booted &&
-        !wall.locked &&
-        !arg.ending ? (
-          <ArgNotification />
-        ) : null}
-        {arg.ending ? <Ending /> : null}
+        {arg.phase !== "remote" ? <Prologue /> : null}
+        {/* 通知在三个阶段都要在：远程时的资产提醒、回到本机后的新邮件提示。 */}
+        {wall.booted ? <ArgNotification /> : null}
+        {arg.phase === "remote" && wall.booted ? <RemoteLayer /> : null}
       </ErrorBoundary>
     </div>
   );
